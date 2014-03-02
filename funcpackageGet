@@ -1,0 +1,384 @@
+#!/bin/bash
+
+## ======================================================================
+## package_get
+## ----------------------------------------------------------------------
+## Download packages
+package_get(){
+if [ $CLI ]; then
+	## Search for the package
+	find $DBDIR -type f -name "LIBS.TXT"|xargs grep -i "^$1.*"|sed 's/ //g' > $TMPDIR/search.tmp
+
+	## If nothing was found then exit
+	[ `wc -l < $TMPDIR/search.tmp` -eq 0 ] && { echo; red "`gettext "Nothing found for: "`" "$1"; cleanup; }
+
+	## Ask for confirmation
+	RESULT=`awk -F: '{print$NF}' $TMPDIR/search.tmp|sort -u`
+	menu_from_variable $RESULT
+else
+	CHOICE=$1
+	grep "test-package-name" <<<$CHOICE && return
+fi
+
+## Check if Bob wants to skip dependcy resolution.
+## Perhaps he forgot his medication today.
+if [ `awk -F= /RESOLVE/'{print$2}' $CONF` = "true" ]; then
+	resolve_deps $CHOICE
+	[ $GUI ] && kill `pgrep -f GTK_TAILBOXNB`
+else
+	## Add the original choice to the package list for download
+	PKGLIST+=($CHOICE)
+fi
+
+## Packages to download are now held in an array called ${PKGLIST[@]}
+## Unresolved deps are held in ${UNRES[@]}
+
+## Notify if we have unresolved deps.
+if [ ${#UNRES[@]} -gt 0 ]; then
+	echo
+	pink "`gettext "WARNING: unresolved dependencies remain."`" | tee -a $TMPDIR/.stream
+	printf -- '%s\n' ${UNRES[@]}
+fi
+
+## Create array that holds download links
+## ${LINKS[@]}
+declare -i TSIZE=0
+
+[ "$ARCH" = "x86_64" ] && ARCHI="x86_64" || ARCHI="x86" # Make an exception for alien repo
+for pkg in ${PKGLIST[@]}; do
+	## Find the OPTIFEST file that holds the package
+	local LONG=`find $DBDIR -type f -name "OPTIFEST"|xargs grep -i "Package:.*$pkg"`
+	local DIST=`cut -d':' -f1 <<<$LONG|awk -F/ '{print $(NF-1)}'`
+	local PKGSHORT=${pkg%-*-*-*}
+	## Based on the distro get the link, package size and total download size
+	local LNKREPO=`grep -m1 -e "^\([a-z]\)" $CONFDIR/mirrors-$DIST.txt`
+	local MID=`grep -A1 "NAME:.*$pkg" $DBDIR/$DIST/PACKAGES.TXT|tail -n1|awk '{print$NF}'|sed  's ..  '`
+	[ "$DIST" = "slackware" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
+	[ "$DIST" = "slackwarepatches" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
+	[ "$DIST" = "slacky" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
+	[ "$DIST" = "alien" ] && local EXTRA=$SLACKVER/$ARCHI
+	[ "$DIST" = "salix" ] && local EXTRA=$ARCH/$SLACKVER
+	[ "$DIST" = "ponce" ] && { unset EXTRA; local MID="slackware${SLACKSUFFIX}-$SLACKVER/packages"; }
+	local LINK=$LNKREPO/$EXTRA/$MID/$pkg
+	LINKS+=( $LINK )
+	local HSIZE=`grep -A3 "NAME:.*$pkg" $DBDIR/$DIST/PACKAGES.TXT|grep -i "(compressed)"|awk -F: '{ gsub (" ", "", $0); print$NF}'`
+	declare -i CSIZE=`tr -d [:alpha:] <<<$HSIZE`
+	let TSIZE=( $TSIZE+$CSIZE )
+	DISP+=( "$pkg [$HSIZE]" )
+done
+
+## If total size exceeds 1024 then print in Mb
+[ $TSIZE -gt 1024 ] && { TSIZE=$((TSIZE / 10**3)); DSIZE="$TSIZE MB"; } || DSIZE="$TSIZE KB"
+
+## Give a final report
+TXTREPLINE1="`gettext "The following packages are required."`"
+TXTREPLINE2="`gettext "Total size:"`"
+if [ $CLI ]; then
+	echo
+	echo $txtblue "$TXTREPLINE1" $rst
+	printf -- '%s\n' "${DISP[@]}"
+	echo
+	echo "$TXTREPLINE2" "$DSIZE"
+else
+	## gtk_menu_deselect dumps a file at $TMPDIR/.menudeselect.dmp
+	local CHKBOXFILE=$TMPDIR/.menudeselect
+	printf '%s\n' ${LINKS[@]}|awk -F/ '{print$NF}' > $CHKBOXFILE
+	gtk_menu_deselect "$TXTREPLINE1 Total size: $DSIZE. Deselect any packages you do not want and click Download."
+	## Create the final packages download variable
+	FINALPKGS=`awk -F= /true/'{print$1}' ${CHKBOXFILE}.dmp`
+	## Did the user choose to create a subfolder for all packages?
+	MAKESUBFOLDER=`awk -F'"' /chkSubFolder/'{print$2}' ${CHKBOXFILE}.dmp`
+	CONVERTPKGS=`awk -F'"' /chkConvert/'{print$2}' ${CHKBOXFILE}.dmp`
+	rm $CHKBOXFILE*
+fi
+
+if [ $CLI ]; then
+	## If more than one package, ask if user wants to create a subdirectory
+	if [ ${#LINKS[@]} -gt 1 ]; then
+		echo
+		echo "`gettext " Multiple packages were detected."`"
+		read -p "`gettext " Would you like to create subfolder for the files? [y/n]"`" -n 1 -r -s && echo
+		if [[ $REPLY =~ ^[Yy]$ ]]; then
+			MAKESUBFOLDER=true
+		fi
+	fi
+fi
+
+## Make a subfolder if chosen
+if [ "$MAKESUBFOLDER" = "true" ]; then
+	ORIGLNK=${LINKS[0]}
+	ORIGPKG=${ORIGLNK##*/}
+	SHNAME=${ORIGPKG%-*-*}
+	SUBFOLDER="/$SHNAME"
+	[ ! -d "$STORAGE$SUBFOLDER" ] && mkdir -p "$STORAGE$SUBFOLDER"
+	STORAGE="$STORAGE$SUBFOLDER"
+fi
+
+if [ $CLI ]; then
+	echo
+	read -p "`gettext " Press [r] to remove packages, [q] to quit, or enter to start downloading."`" -n 1 -r -s && echo
+	[[ $REPLY =~ ^[Qq]$ ]] && cleanup
+	if [[ $REPLY =~ ^[Rr]$ ]]; then 
+		for a in ${LINKS[@]}; do shlink=${a##*/}; tLINKS+=( $shlink ); done
+		if [ ${#tLINKS[@]} -lt 10 ];then
+			menu_deselect "${tLINKS[@]}"
+			unset tLINKS
+				else
+			menu_deselect_plusten "${tLINKS[@]}"
+		fi
+	fi
+fi
+
+## menu_deselect returns the variable $FINALPKGS
+## Remove any deselected packages from array ${LINKS[@]}
+if [ "$FINALPKGS" ]; then
+	for a in $FINALPKGS; do
+		grep -q $a <<<${LINKS[@]} && pLINKS+=( `printf '%s\n' ${LINKS[@]}|grep $a` )
+	done
+	LINKS=("${pLINKS[@]}") && unset pLINKS
+fi
+
+## Prepare download if GUI
+if [ $GUI ]; then
+	echo `basename ${LINKS[0]}` > $TMPDIR/.message
+	gtk_download
+fi
+
+## Download files
+for a in ${LINKS[@]}; do
+	local shorty=${a##*/}
+	if [ -e $STORAGE/$shorty ]; then
+		[ $CLI ] && echo "$shorty" "`gettext "already exists"`"
+		continue
+			else
+		dloadInProgress=$shorty
+		[ $GUI ] && echo $shorty > $TMPDIR/.message && wget $a -o $TMPDIR/.progress -P $STORAGE
+		[ $CLI ] && download $a $STORAGE
+		[ $CLI ] && [ ! -e $STORAGE/$shorty ] && { echo $txtbld "`gettext "There was a problem downloading the file:"`" $rst "$shorty"; continue; }
+		unset dloadInProgress
+	fi
+done
+[ -e $TMPDIR/.progress ] && rm $TMPDIR/.progress
+[ -e $TMPDIR/.message ] && rm $TMPDIR/.message
+wait
+
+
+## Should we convert slackware packages to porteus modules?
+if [ -e /etc/porteus-version ]; then
+if [ $GUI ]; then
+	if [ "$CONVERTPKGS" == "true" ];then
+		export STATE=BUILDMODULES
+		touch $TMPDIR/proglock
+		gtk_progress "Converting"
+		for a in ${LINKS[@]}; do
+			local shorty=${a##*/}
+			echo "$shorty" > $TMPDIR/.message
+			txz2xzm $STORAGE/$shorty > $TMPDIR/.progress
+		done
+		rm $TMPDIR/proglock
+		sleep 0.4
+		kill_progress 2>/dev/null
+		sleep 1
+		gtk_message2 "`gettext "Your files are ready in"`" "$STORAGE"
+	fi
+else
+	if [ `awk -F= /MODULES/'{print$2}' $CONF` == "true" ]; then
+		echo
+		bold "Commencing package conversion ..."
+		sleep 2
+		for a in ${LINKS[@]}; do
+			local shorty=${a##*/}
+			txz2xzm $STORAGE/$shorty
+		done
+	fi
+fi
+fi
+unset LINKS LINK DISP FINALPKGS STATE
+}
+
+## ======================================================================
+## resolve_deps
+## ----------------------------------------------------------------------
+## Resolve dependencies for a package
+## Feed this function a slackware package
+resolve_deps(){
+## Open a package queue that we can loop through
+PKGQ+=( "${1##*/}" )
+
+## Open a list of packages to be downloaded
+PKGLIST+=( "${1##*/}" )
+
+## Start a gui if required
+if [ $GUI ]; then
+	echo "${PKG[0]}" > $TMPDIR/.stream
+	[ ! `pgrep -f GTK_TAILBOXNB` ] && gtk_tailboxnb 80 &
+fi
+
+until [ ${#PKGQ[@]} -eq 0 ]; do
+	## Set first package
+	local PKG=${PKGQ[0]}
+	## Open a tailbox if none already exist
+	{ echo; echo "`gettext "Processing: "`" $txtbld "$PKG" $rst; } | tee $TMPDIR/.stream
+	sleep 2
+	## Find the LIBS.TXT file for the package. If there is none then die like a dog.
+	TARGLIB=`find $DBDIR -type f -name "LIBS.TXT" | xargs grep -i "^$PKG" | head -n1 | awk -F: '{print$1}'`
+	[ $CLI ] && [ -z $TARGLIB ] && fatality "$SCRIPT $FUNCNAME $LINENO" "`gettext "Could not find:"`" "LIBS.TXT"
+	[ $GUI ] && [ -z $TARGLIB ] && { echo "`gettext "Could not find:"`" "LIBS.TXT" > $TMPDIR/.stream; gtk_message2 "`gettext "Fatal error"`" "LIBS.TXT"; exit; }
+	## Does the package have dependencies?
+	HASDEPS=`grep -A1 "$PKG" $TARGLIB|tail -n1|grep -v ".*\.t.z"`
+	if [[ ! -z $HASDEPS ]]; then
+		ALLDEPS=`sed 's@,@@g' <<<$HASDEPS`
+		LIBCNT=`wc -w <<<$ALLDEPS`
+		declare -i RESCNT=0
+		[ $CLI ] && { echo; echo "`gettext "Libraries required: "`" "$LIBCNT"; }
+		
+		## Remove the system libs from the required library list (ALLDEPS)
+		for a in $ALLDEPS; do
+			if [[ `grep $a $LOCALDB/libs.txt` ]]; then
+				ALLDEPS=${ALLDEPS/$a/}
+				(( RESCNT++ ))
+			fi
+		done
+		[ $CLI ] && echo "`gettext "Libraries found in system:"`" "$RESCNT"
+		[ $CLI ] && { echo "`gettext "Libraries to resolve:"`" "`wc -w <<<$ALLDEPS`"; echo; }
+
+		## For the libraries left in $ALLDEPS, look for the mother package
+		## in the optimized manifest (OPTIFEST)
+		for a in $ALLDEPS; do
+			[ $CLI ] && echo "`gettext "Processing library:"`" "$a"
+			## Search for packages containing required library
+			local MOTHERPKG=`find $DBDIR -name OPTIFEST|xargs tac|sed -n "/$a/,/Package:/p"|awk /Package:/'{print$NF}'`
+			## If there is multiple packages then ask user which they prefer.
+			## We should include the package size to help with the decision
+			if [[ "$MOTHERPKG" ]]; then
+				## If mother package exists in ${PKGLIST[@]} (user already chose) then skip it
+				if [ ${#PKGLIST[@]} -ne 0 ]; then
+					for HAVEIT in $MOTHERPKG; do
+						if [ `echo ${PKGLIST[@]}|grep -o $HAVEIT` ]; then
+							continue 2
+						fi
+					done
+				fi
+				## Get the number of packages (declare as an integer for later use)
+				declare -i MPKGCNT=`wc -w <<<$MOTHERPKG`
+				if [ $MPKGCNT -gt 1 ]; then
+					## We want to remove duplicated packages of same version
+					for dup in $MOTHERPKG; do
+						shortv=${dup%-*-*}
+						if [ `grep -c $shortv <<<"$MOTHERPKG"` -gt 1 ]; then
+							REDUCETO1=`grep $shortv <<<"$MOTHERPKG"|sort -V|head -n1`
+							MOTHERPKG2="`tr " " "\n" <<<$MOTHERPKG|sed '/'$shortv'/d'` $REDUCETO1"
+							MOTHERPKG=$MOTHERPKG2
+						fi
+					done
+					## If only one package is available then add it automatically
+					if [ `wc -w <<<$MOTHERPKG` -eq 1 ]; then
+						## Add the mother package to $PKGQ array for processing
+						PKGQ+=( "$MOTHERPKG" )
+						## Add the mother package to our global package list array (PKGLIST)
+						PKGLIST+=( "$MOTHERPKG" )
+						## Break from loop and continue with next package
+						continue
+					fi
+					## Find the size and distro for each package
+					for b in $MOTHERPKG; do
+						## Get the short slackware name
+						MSHORT=${MOTHERPKG%-*-*-*}
+						local SIZELONG=`find $DBDIR -name PACKAGES.TXT|xargs grep -A5 $b|awk "/\(compressed/"`
+						## This next line is needed because slackers PACKAGES.TXT are very different from others
+						[ `wc -c <<<$SIZELONG` -lt 3 ] && local SIZELONG=`find $DBDIR -name PACKAGES.TXT|xargs grep -A5 "PACKAGE NAME:.*$MSHORT$"|awk "/\(compressed/"`
+						local PKGSIZE=`echo ${SIZELONG##*:}|sed 's/ //g'`
+						local PKGDIST=`echo ${SIZELONG%-*}|awk -F/ '{print $(NF-1)}'`
+						## Put values into array just so we can give nice columned output (damn column)
+						DISPLAYIT+=( "$b $PKGSIZE $PKGDIST" )
+					done
+					## Present the user with a choice ## TODO
+					export RESULT="$MOTHERPKG"
+					TXTMULTIPKG="`gettext "More than one package contains:"`"
+					if [ $CLI ]; then
+						echo
+						echo $txtcyan "$TXTMULTIPKG" $rst "$a"
+						printf '%s\n' "${DISPLAYIT[@]}"|column -t
+						menu_from_variable $RESULT
+						unset DISPLAYIT
+					else
+						gtk_menu_from_variable "$TXTMULTIPKG $a"
+					fi
+					## Add the chosen package to $PKGQ array for processing
+					PKGQ+=( $CHOICE )
+					## Add chosen package to final download list
+					PKGLIST+=( $CHOICE ) && unset CHOICE
+				else
+					## Add the mother package to $PKGQ array for processing
+					PKGQ+=( "$MOTHERPKG" )
+					## Add the mother package to our global package list array (PKGLIST)
+					PKGLIST+=( "$MOTHERPKG" )
+				fi
+			else
+				## Houston we have a problem! No mother package found.
+				## Add the unresolved lib to an array for retrieval later
+				UNRES+=( $a )
+			fi
+		done
+		## Remove package from PKGQ
+		PKGQ=("${PKGQ[@]:1}")
+		
+		## Remove duplicates from array
+		PKGQ2=( `printf '%s\n' ${PKGQ[@]}|awk '!x[$0]++'` )
+		PKGQ=("${PKGQ2[@]}") && unset PKGQ2
+		echo
+		continue
+	else
+	## No deps for this package
+	## Remove package from PKGQ
+	PKGQ=("${PKGQ[@]:1}")
+	fi
+done # Ends while loop for ${#PKGQ[@]}
+}
+
+## =====================================================================
+## convert_size
+## ---------------------------------------------------------------------
+## Converts size to human readable
+function convert_size(){
+declare -i GSIZE=$1
+[ $GSIZE -gt 1024 ] && OSIZE="`echo "scale=2; $GSIZE/1024"|bc` MB" || OSIZE="${GSIZE} KB"
+unset GSIZE
+}
+
+## =====================================================================
+## package_get_link
+## ---------------------------------------------------------------------
+## Create links for chosen packages
+## Creates ${LINKS[@]} array and ${DISP[@]} (human readable output)
+## $1=package name
+function package_get_link(){
+## Exception for alien repo
+[ "$ARCH" = "x86_64" ] && ARCHI=x86_64 || ARCHI=x86
+
+declare -i TSIZE=0
+for pkg in $1; do
+    ## Find the OPTIFEST file/s that holds the package
+    local LONG=`find $DBDIR -type f -name "OPTIFEST"|xargs grep -i "Package:.*$pkg"|head -n1`
+    local DIST=`cut -d':' -f1 <<<$LONG|awk -F/ '{print $(NF-1)}'`
+    local PKGSHORT=${pkg%-*-*-*}
+    
+    ## Based on the distro get the link, package size and total download size
+    local LNKREPO=`grep -m1 -e "^\([a-z]\)" $CONFDIR/mirrors-$DIST.txt`
+    [ "$ARCH" = "x86_64" ] && ARCHI="x86_64" || ARCHI="x86"
+    [ "$DIST" = "slackware" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
+    [ "$DIST" = "slackwarepatches" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER/patches
+    [ "$DIST" = "slacky" ] && local EXTRA=slackware$SLACKSUFFIX/$SLACKVER
+    [ "$DIST" = "alien" ] && local EXTRA=$SLACKVER/$ARCHI
+    [ "$DIST" = "salix" ] && local EXTRA=$ARCH/$SLACKVER/salix
+    [ "$DIST" = "ponce" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
+    local MID=`grep -A1 "NAME:.*$pkg" $DBDIR/$DIST/PACKAGES.TXT|tail -n1|awk '{print$NF}'|sed  's ..  '`
+    [ "$DIST" = "ponce" ] && local MID=packages
+    local LINK=$LNKREPO/$EXTRA/$MID/$pkg
+    LINKS+=( $LINK )
+    local HSIZE=`grep -A3 "NAME:.*$pkg" $DBDIR/$DIST/PACKAGES.TXT|grep "(comp"|awk -F: '{ gsub (" ", "", $0); print$NF}'`
+    declare -i CSIZE=`tr -d [:alpha:] <<<$HSIZE`
+    convert_size $CSIZE # Returns $OSIZE as MB or KB depending on value given in CSIZE
+    DISP+=( "$pkg [$OSIZE]" )
+done
+}

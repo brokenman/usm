@@ -1,0 +1,150 @@
+#!/bin/bash
+
+## Color definitions for light and dark CLI backgrounds
+txtund=$(tput sgr 0 1)          # Underline
+txtbld=$(tput bold)             # Bold
+txtred=$(tput setaf 1)${txtbld} # Red
+txtgreen=$(tput setaf 2)${txtbld} #  green
+txtblue=$(tput setaf 4)${txtbld}  # blue
+txtpink=$(tput setaf 5)${txtbld} #  pink
+txtcyan=$(tput setaf 6)${txtbld} #  cyan
+rst=$(tput sgr0)             # Reset
+
+function bold(){ echo -e $txtbld "$@" $rst; }
+
+function green() { echo -e $txtgreen "$1" $rst; }
+
+function pink(){ echo $txtpink "$1" $rst; }
+
+function cyan(){ echo -e $txtcyan "$1" $rst; }
+
+function blue(){ echo -e $txtblue "$@" $rst; }
+
+function red(){ echo -e $txtred "$@" $rst; }
+
+## ======================================================================
+## menu_multiple_choice
+## ----------------------------------------------------------------------
+## Multiple choice menu called by other functions
+function menu_multiple_choice() {
+	echo
+    echo "`gettext "Avaliable options:"`"
+    echo
+    for i in ${!required[@]}; do 
+        printf "%3d%s) %s\n" $((i+1)) "${choices[i]:- }" "${required[i]}"
+    done
+    [[ "$msg" ]] && echo "$msg"; :
+}
+
+## ======================================================================
+## menu_from_variable
+## ----------------------------------------------------------------------
+## Creates a cli menu from variable containing a list
+## Feed this function a variable called $RESULT
+## It returns out $CHOICE
+function menu_from_variable(){
+echo
+echo "`gettext " The following items were found."`"
+blue "`gettext "Choose an number to confirm."`"
+echo "`gettext " ctrl+c to quit"`" && echo
+select CHOICE in $RESULT; do
+    if [ -z "$CHOICE" ]; then
+        bold "`gettext "Invalid choice!"`" && echo
+        $FUNCNAME
+    fi
+    break
+done
+}
+
+## ======================================================================
+## menu_deselect
+## ----------------------------------------------------------------------
+## Creates a cli menu with all options already checked
+function menu_deselect(){
+required=( $@ )
+clear
+choices=( `printf '+ %.0s' {1..100}` )
+prompt="`gettext "Deselect an item (again to reselect, ENTER when ready):"`"
+while menu_multiple_choice && read -n1 -rp "$prompt" num && [[ "$num" ]]; do
+    [[ "$num" != *[![:digit:]]* ]] && (( num > 0 && num <= ${#required[@]} )) || {
+        msg="Invalid option: $num"; clear; continue
+    }
+    ((num--)); msg=""
+    [[ "${choices[num]}" ]] && choices[num]="" || choices[num]="+"
+clear
+done
+
+msg=" nothing"
+for i in ${!required[@]}; do 
+    [[ "${choices[i]}" ]] && { FINALPKGS="${FINALPKGS} ${required[i]}"; msg=""; }
+done
+echo
+}
+
+## ======================================================================
+## menu_deselect_plusten
+## ----------------------------------------------------------------------
+## Creates a cli menu with all options already checked
+## for use with more than nine items (double digits)
+function menu_deselect_plusten(){
+required=( $@ )
+clear
+choices=( `printf '+ %.0s' {1..100}` )
+prompt="`gettext "Type number and press enter to deselect an item (again to reselect, ENTER when ready):"`"
+while menu_multiple_choice && read -rp "$prompt" num && [[ "$num" ]]; do
+    [[ "$num" != *[![:digit:]]* ]] && (( num > 0 && num <= ${#required[@]} )) || {
+        msg="Invalid option: $num"; clear; continue
+    }
+    ((num--)); msg=""
+    [[ "${choices[num]}" ]] && choices[num]="" || choices[num]="+"
+clear
+done
+
+msg=" nothing"
+for i in ${!required[@]}; do 
+    [[ "${choices[i]}" ]] && { FINALPKGS="${FINALPKGS} ${required[i]}"; msg=""; }
+done
+echo
+}
+
+## ======================================================================
+## download
+## ----------------------------------------------------------------------
+## A simple download percentage scroller
+function download() {
+local url=$1
+local file=${url##*/}
+
+## Load current download into a variable so we can remove it if user cancels mid download.
+dloadInProgress=$url
+
+if [ "$DLOADER" = "curl" ]; then
+    $DLOADER $2/$file $url
+        else
+    # Downloader is wget
+    echo -n "Downloading: $file --> "
+    $DLOADER $2/$file $url 2>&1 | grep --line-buffered "%" |sed -u -e "s,\.,,g" | awk '{printf("\b\b\b\b%4s", $2)}'
+    echo -ne "\b\b\b\b"
+    echo " DONE"
+fi
+unset dloadInProgress
+}; export -f download
+
+## ======================================================================
+## help_check
+## ----------------------------------------------------------------------
+## Check if user passed help switch in cli
+function help_check(){
+[ `egrep "^-h$|^-help$|^--help$|^help$|\?" <<<$1` ] || [ -z $1 ] && return 0
+}
+
+## ======================================================================
+## help_give
+## ----------------------------------------------------------------------
+## Display help
+function help_give(){
+echo
+echo -e $txtbld "Use: $1" $rst
+echo " $2"
+cleanup
+}

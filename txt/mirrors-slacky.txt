@@ -1,0 +1,4 @@
+# mirrors - List of Slacky Linux mirrors
+
+## UNITED KINGDOM
+http://slackware.org.uk/slacky

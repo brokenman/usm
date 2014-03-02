@@ -1,0 +1,35 @@
+#!/bin/bash
+
+## For functions that do general work relevent to GUI or CLI
+
+## =====================================================================
+## browser_open
+## ---------------------------------------------------------------------
+## Open a URL in the systems default browser
+function browser_open(){
+local BROWSERLIST="firefox opera google-chrome-stable konqueror chromium"
+local URL=$1
+
+## Who originally ran the script
+local USERX=`< $TMPDIR/user`
+
+## If BROWSER environment variable is set then we are good
+[[ -x $BROWSER ]] && { su - $USERX -c "$BROWSER $URL"; exit; }
+
+## Find the universal opener
+for a in gvfs-open gnome-open xdg-open; do
+	hash $a 2>/dev/null && { local OPENER=$a; break; } || unset OPENER
+done
+
+## If no universal opener was found fall back to scraping for a browser :(
+if [ -z $OPENER ]; then
+	for a in $BROWSERLIST; do
+		hash $a 2>/dev/null && { local OPENER=$a; break; }
+	done
+fi
+
+## If there is still no opener then give up
+[ -z $OPENER ] && { echo "`gettext "No internet browser found."`"; cleanup; }
+
+su - $USER -c "$OPENER http://google.com"
+}; export -f browser_open
