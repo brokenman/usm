@@ -172,7 +172,9 @@ Slackware Package Tools
 EOF
 
 ## Create slackbuilds categories
+if [ -e $DBDIR/sbo/SLACKBUILDS.TXT ]; then
 awk -F/ '/SLACKBUILD LOCATION:/{print$2}' $DBDIR/sbo/SLACKBUILDS.TXT|sort -u > $TMPDIR/sbo-categories.tmp
+fi
 
 echo "Processing ..." > $TMPDIR/.stream
 touch $TMPDIR/sbocategs
