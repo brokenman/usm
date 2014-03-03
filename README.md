@@ -11,8 +11,11 @@ Beta only runs on slackware 14.1
 By default the build strips all comments
 
 Example build usages:
+
     make STRIP_COMMENTS=false DESTDIR=/tmp/usmbuild install
+    
     make uninstall
+    
     make PREFIX=/usr install
 
 
