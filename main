@@ -625,8 +625,7 @@ export USM_MAIN='
 
 <statusbar has-resize-grip="false">
 	<variable>stb0</variable>
-##	<input>echo "USM v$USMVERSION  |  gtkdialog v$GTKVERSION"</input>
-	<input>shuf -n 1 '$DATADIR'/random.txt</input>
+	<input>echo "STORAGE: '$(awk -F= '/STORAGE/{print$NF}' $CONF)'"</input>
 </statusbar>
 		
 </vbox>
