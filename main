@@ -1,4 +1,5 @@
 #!/bin/bash
+export TEXTDOMAIN=usm
 
 # Usm - A unified package manager for Slackware Linux
 # Copyright (C) 2014-2020 Jay Flood
@@ -334,7 +335,7 @@ export USM_MAIN='
 <menubar>
 
 ## ==================== TOOLS MENU ==================== ##
-	<menu label="_'$(gettext "Tools")'" use-underline="true" icon-name="applications-system">
+	menu label="'$(gettext "_Tools")'" use-underline="true" icon-name="applications-system">
 ## <------------------- Package tools shows if running on portues or slackware
 	'"`if [ -e /etc/slackware-version ]; then
 	echo '<menuitem icon-name="applications-other" tooltip-text="'$(gettext "Various slackware package tools")'">
@@ -371,7 +372,7 @@ export USM_MAIN='
 	</menu>
 
 ## =================== SETTINGS MENU ================== ##
-	<menu label="_'$(gettext "Settings")'" use-underline="true" icon-name="gtk-execute">
+	<menu label="'$(gettext "_Settings")'" use-underline="true" icon-name="gtk-execute">
 	<menuitem icon="gtk-edit"><label>'$(gettext "Edit configuration file")'</label>
 		<action>gtk_editFile '$CONF'</action>
 	</menuitem>
@@ -402,7 +403,7 @@ export USM_MAIN='
 	</menu>
 
 ## =================== UPDATE MENU ================== ##
-	<menu label="_'$(gettext "Updates")'" use-underline="true" icon-name="gtk-refresh">
+	<menu label="'$(gettext "_Updates")'" use-underline="true" icon-name="gtk-refresh">
 
 	<menuitem icon="usm"><label>'$(gettext "Update USM")'</label>
 		<action>update_usm &</action>
@@ -428,7 +429,7 @@ export USM_MAIN='
 	</menu>
 
 ## =================== HELP MENU ================== ##
-	<menu label="_'$(gettext "Help")'" use-underline="true" icon-name="gtk-info">
+	<menu label="'$(gettext "_Help")'" use-underline="true" icon-name="gtk-info">
 	<menuitem icon="gtk-about"><label>'$(gettext "About USM")'</label>
 		<action>gtk_aboutusm &</action>
 	</menuitem>
