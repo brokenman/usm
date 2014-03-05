@@ -240,8 +240,7 @@ sed '/txz$\|tgz$/ s/^/Package: /' > $SDIR/OPTIFEST
 ## Add missing libraries from suppliment-optifest.txt file
 for mypkg in `grep ".*$ARCH.*\.t.z" $SUPPLIMENTOPTI`; do
 	if [ `grep -o $mypkg $SDIR/OPTIFEST` ]; then
-	  #for library in `sed -e "s/$mypkg//;s/ENDOF.*//" -e '/^$/d' $SUPPLIMENTOPTI`; do
-	  for library in `sed '1,/'$mypkg'/d;/ENDOF/,$d' $SUPPLIMENTOPTI`; do
+	  for library in `sed -n '/'$mypkg'/,/ENDOF/p' $SUPPLIMENTOPTI|egrep -v "$mypkg|ENDOF"`; do
 		[[ ! `grep -o "$library$" $SDIR/OPTIFEST` ]] && sed -i 's/'$mypkg'/&\n'$library'/' $SDIR/OPTIFEST
 	  done
 	fi
