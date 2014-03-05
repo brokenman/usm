@@ -71,6 +71,7 @@ install: check
 	cp conf/*.conf $(DESTDIR)$(SYSCONFDIR)/$(TARGET); \
 	echo "PREFIX=$(PREFIX)" >> $(DESTDIR)$(SYSCONFDIR)/$(TARGET)/$(TARGET).conf; \
 	cp txt/mirror* txt/supp* $(DESTDIR)$(SYSCONFDIR)/$(TARGET); \
+	cp -r i18n/usr $(DESTDIR); \
 	cp usmgui $(DESTDIR)$(BINDIR)
 
 	for func in func*; do \

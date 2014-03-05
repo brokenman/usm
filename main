@@ -335,7 +335,7 @@ export USM_MAIN='
 <menubar>
 
 ## ==================== TOOLS MENU ==================== ##
-	menu label="'$(gettext "_Tools")'" use-underline="true" icon-name="applications-system">
+	<menu label="'$(gettext "_Tools")'" use-underline="true" icon-name="applications-system">
 ## <------------------- Package tools shows if running on portues or slackware
 	'"`if [ -e /etc/slackware-version ]; then
 	echo '<menuitem icon-name="applications-other" tooltip-text="'$(gettext "Various slackware package tools")'">

@@ -1,15 +1,18 @@
 #!/bin/bash
 
-## Includes
-. funcgtkDialogs
-
 ## Variables
 [ -e /etc/slackware-version ] && iconname=usm
 [ -e /etc/porteus-version ] && iconname=cdr
 
 ## Find an existing tmp directory from usm if it was run
 TMPDIR=`ls /tmp|grep 'usm\.[[:alnum:]]'`
-[ -z $TMPDIR ] && TMPDIR=/tmp/usm.$$ || FOUNDTMP=1
+##[ -z $TMPDIR ] && TMPDIR=/tmp/usm.$$ || FOUNDTMP=1
+if [[ -z $TMPDIR ]]; then
+	TMPDIR=/tmp/usm.$$
+else
+	TMPDIR="/tmp/$TMPDIR"
+	FOUNDTMP=1
+fi
 
 ## Export some variables
 export TMPDIR
