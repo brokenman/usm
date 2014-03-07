@@ -55,21 +55,28 @@ for PACKAGE in /var/log/packages/*; do
     done
 done
 
-## If dependencies are missing give a count
-if [ -e $CACHE ]; then
-    local MDEPCNT=`grep "not found" $CACHE|sort -u|wc -l`
-    echo
-    [ $MDEPCNT -gt 1 ] && echo $txtbld "`gettext "Missing dependencies:"`" $rst "$MDEPCNT"
-else
-    echo "`gettext "Missing dependencies: 0"`" && cleanup end
-fi
-
 ## Give report
 echo "####################################"
 cat $CACHE
 echo
 echo "####################################"
 echo
+
+## If dependencies are missing give a count
+if [ -e $CACHE ]; then
+    local MDEPCNT=`grep "not found" $CACHE|sort -u|wc -l`
+    echo
+    [ $MDEPCNT -gt 1 ] && { echo $txtbld "`gettext "Missing dependencies:"`" $rst "$MDEPCNT"; echo; awk '/=>/{print$1}' $CACHE |sort -u; }
+else
+    echo "`gettext "Missing dependencies: 0"`" && cleanup end
+fi
+
+## Check database files
+if [ $MISSINGDB ]; then
+	echo $txtbld "$DATABASEERROR2" $rst
+	echo "`gettext " Please run: usm -u all"`"
+	cleanup
+fi
 
 ## If dependencies are found then search for mother package.
 for a in `grep "\=>" $CACHE|sort -u|awk '{print$1}'`; do
@@ -205,6 +212,7 @@ else
     echo "`gettext "This is not a valid file."`"
     cleanup end
 fi
+echo $txtbld "`gettext "Processing"`" $rst "$PACKAGE" && echo 
 
 ## These are the includes and excludes when searching for executables and libs
 local INCLUDES="lib/.*|lib64/.*|bin/.*"
@@ -231,21 +239,28 @@ for b in `egrep "lib/.*|lib64/.*|bin/.*" $1|egrep -v "$EXCLUDES"|sed '/.*/s/^/\/
     fi
 done
 
-## If dependencies are missing give a count
-if [ -e $CACHE ]; then
-    local MDEPCNT=`grep "not found" $CACHE|sort -u|wc -l`
-    echo
-    [ $MDEPCNT -gt 1 ] && echo $txtbld "`gettext "Missing dependencies:"`" $rst "$MDEPCNT"
-else
-    echo "`gettext "Missing dependencies: 0"`" && cleanup end
-fi
-
 ## Give report
 echo "####################################"
 cat $CACHE
 echo
 echo "####################################"
 echo
+
+## If dependencies are missing give a count
+if [ -e $CACHE ]; then
+    local MDEPCNT=`grep "not found" $CACHE|sort -u|wc -l`
+    echo
+    [ $MDEPCNT -gt 1 ] && { echo $txtbld "`gettext "Missing dependencies:"`" $rst "$MDEPCNT"; echo; awk '/=>/{print$1}' $CACHE |sort -u; }
+else
+    echo "`gettext "Missing dependencies: 0"`" && cleanup end
+fi
+
+## Check database files
+if [ $MISSINGDB ]; then
+	echo && echo $txtbld "$DATABASEERROR2" $rst
+	echo "`gettext " Please run: usm -u all"`"
+	cleanup
+fi
 
 ## If dependencies are found then search for mother package.
 for a in `grep "\=>" $CACHE|sort -u|awk '{print$1}'`; do

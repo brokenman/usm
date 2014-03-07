@@ -143,6 +143,9 @@ DUMP=$TMPDIR/usmdump
 if [ $CLI ]; then
 	((!$#)) && pink "`gettext "No argument was supplied."`" && display_usage
 	help_check $1 && display_usage
+	## If user is running usm -d then set a variable so we can skip database
+	## check which will be checked after the initial report from usm -d
+	[ "$1" = "-d" ] && SYSTEMDEPS=0
 fi
 
 ## Prepare the system for takeoff

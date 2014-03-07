@@ -133,9 +133,11 @@ if [ $MISSINGDB ]; then
 	if [ $GUI ]; then
 		gtk_message "$DATABASEERROR1" "$DATABASEERROR2" "`gettext "You can update databases using the update menu."`" gtk-dialog-error 500
 	else
-		echo && echo $txtbld "$DATABASEERROR2" $rst
-		echo "`gettext " Please run: usm -u all"`"
-		cleanup
+		if [ -z $SYSTEMDEPS ]; then
+			echo && echo $txtbld "$DATABASEERROR2" $rst
+			echo "`gettext " Please run: usm -u all"`"
+			cleanup
+		fi
 	fi
 fi
 
