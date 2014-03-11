@@ -148,6 +148,9 @@ if [ $CLI ]; then
 	[ "$1" = "-d" ] && SYSTEMDEPS=0
 fi
 
+## If user is updating then set variable
+[[ `egrep -o "\-u|\-update|\--update|update" <<<$1` ]] && UPDATENOW=0
+
 ## Prepare the system for takeoff
 ## If tagfile exists then we are re-calling a CLI part of this
 ## script from the GUI so we don't want to rerun the setup

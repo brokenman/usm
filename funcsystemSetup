@@ -35,6 +35,7 @@ case $ARCH in
 esac
 
 ## Check system has the required programs
+[ $CLI ] && local required="sed ldd installpkg removepkg awk bash" || \
 local required="sed ldd installpkg removepkg awk bash gtkdialog"
 for a in $required; do
 	! [[ `which $a 2>/dev/null` ]] && nothave+=( $a )
@@ -121,6 +122,8 @@ if [ "$DLOADER" = "curl" ]; then
 fi
 
 ## Check for database files
+echo "UPDATENOW:$UPDATENOW"
+if [ -z $UPDATENOW ]; then
 for a in MANIFEST PACKAGES.TXT LIBS.TXT OPTIFEST; do
     [ ! -f $DBDIR_SLACKWARE/$a ] && MISSINGDB=1
     [ ! -f $DBDIR_SLACKY/$a ] && MISSINGDB=1
@@ -139,6 +142,8 @@ if [ $MISSINGDB ]; then
 			cleanup
 		fi
 	fi
+fi
+unset UPDATENOW
 fi
 
 ## Setup any directories we may need
