@@ -122,7 +122,6 @@ if [ "$DLOADER" = "curl" ]; then
 fi
 
 ## Check for database files
-echo "UPDATENOW:$UPDATENOW"
 if [ -z $UPDATENOW ]; then
 for a in MANIFEST PACKAGES.TXT LIBS.TXT OPTIFEST; do
     [ ! -f $DBDIR_SLACKWARE/$a ] && MISSINGDB=1
