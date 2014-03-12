@@ -47,7 +47,7 @@
 #----------------------------------------------------------------
 # USE MIRRORS.SLACKWARE.COM (FINDS A NEARBY MIRROR)
 # ftp://mirrors.slackware.com:/slackware/
-# http://mirrors.slackware.com/slackware/
+http://mirrors.slackware.com/slackware/
 # AUSTRALIA (AU)
 # ftp://ftp.cc.swin.edu.au/slackware/
 # http://ftp.cc.swin.edu.au/slackware/
@@ -70,7 +70,7 @@
 # http://mirror.datacenter.by/pub/slackware/
 # BRAZIL (BR)
 # ftp://ftp.slackware-brasil.com.br/
-http://ftp.slackware-brasil.com.br/
+# http://ftp.slackware-brasil.com.br/
 # BULGARIA (BG)
 # ftp://mirrors.unixsol.org/slackware/
 # http://mirrors.unixsol.org/slackware/
