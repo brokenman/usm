@@ -118,6 +118,13 @@ local file=${url##*/}
 ## Load current download into a variable so we can remove it if user cancels mid download.
 dloadInProgress=$url
 
+## Check if user wants to use a proxy
+if [ `grep "^PROXY=" $CONF` ]; then # FIX ME
+	xPROXY=`awk -F'=' '/^PROXY=/{print$NF}' $CONF`
+	export http_proxy=${xPROXY}/
+	echo "`gettext "Using proxy server:"`" $txtcyan " $http_proxy" $rst
+fi
+
 if [ "$DLOADER" = "curl" ]; then
     $DLOADER $2/$file $url
         else
