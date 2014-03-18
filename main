@@ -258,6 +258,8 @@ if [ "$1" ]; then
 			else
 		system_deps
 	fi
+else
+	system_deps
 fi
 cleanup end
 ;;
