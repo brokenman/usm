@@ -248,11 +248,16 @@ if [ "$1" = "?" ]||[ "$1" = "-h" ]||[ "$1" = "--help" ]||[ "$1" = "help" ]; then
 	cleanup
 fi
 
-## Check if user supplied single installed package or all
+## Check if user supplied single package or all
 if [ "$1" ]; then
-	system_deps_single $1
-		else
-	system_deps
+	if [ ! -e $1 ]; then echo $txtbld "`gettext "This is not a valid file."`"; cleanup; fi
+	if [ `egrep -o "txz|tgz|xzm" <<<$1` ]; then
+		system_deps_package $1
+			elif [ `grep -o "/var/log/packages" <<<$1` ]; then
+				system_deps_single $1
+			else
+		system_deps
+	fi
 fi
 cleanup end
 ;;
