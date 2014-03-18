@@ -230,11 +230,6 @@ for b in `egrep "lib/.*|lib64/.*|bin/.*" $1|egrep -v "$EXCLUDES"|sed '/.*/s/^/\/
                     NOTFOUND=`echo -e "\n$NOTFOUND"|sed -e 's/^[ \t]*//' -e '/'$x'/d' -e '/^$/d'`
                 fi
             done
-        else
-			echo "`gettext "All dependencies seem to be resolved for"`" "$PACKAGE"
-			echo
-			return
-			cleanup
         fi
         ## If NOTFOUND still has stuff in it then send to cache report file
         if [ `wc -c <<<"$NOTFOUND"` -gt 3 ]; then 
