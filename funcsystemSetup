@@ -24,14 +24,14 @@ fi
 
 [ "$ARCH" = "" ] && ARCH=`uname -m`
 case $ARCH in
-    i386|i486|i586|i686)
-        export ARCH=i486
-        export SLACKSUFFIX=""
-    ;;
-    x86-64|x86_64|X86-64|X86_64)
-        export ARCH=x86_64
-        export SLACKSUFFIX="64"
-    ;;
+	i386|i486|i586|i686)
+		export ARCH=i486
+		export SLACKSUFFIX=""
+	;;
+	x86-64|x86_64|X86-64|X86_64)
+		export ARCH=x86_64
+		export SLACKSUFFIX="64"
+	;;
 esac
 
 ## Check system has the required programs
@@ -45,12 +45,12 @@ done
 if [ ${#nothave[@]} -gt 0 ]; then
 	SANITYERROR=`gettext "You need the following programs to continue: "`
 	if [ $GUI ]; then
-    gtk_message2 "$SANITYERROR" "`printf -- '%s\n' ${nothave[@]}`" gtk-dialog-error 500
+	gtk_message2 "$SANITYERROR" "`printf -- '%s\n' ${nothave[@]}`" gtk-dialog-error 500
 		else
 	echo
 	echo -e $txtbld "$SANITYERROR" $rst 
 	printf -- '%s\n' ${nothave[@]}
-    fi
+	fi
 	cleanup
 fi
 
@@ -70,6 +70,14 @@ fi
 ## Set resolve dependencies option if removed or commented in usm.conf
 [ -z $RESOLVE ] && export RESOLVE=false
 
+## Check for graphical file manager
+if [ $GUI ]; then
+	FMANAGER=="dolphin konqueror krusader thunar nautilus caja spacefm krusader pcmanfm xfe rox"
+	for a in $FMANAGER; do
+		command -v $a >/dev/null && { export FILEMANAGER=`command -v $a`; break; }
+	done
+fi
+
 ## Check if another instance is running or set lock file
 if [ -e /var/lock/usm.* ]; then
 	LOCKFILEERROR1=`gettext "Usm is already active."`
@@ -85,21 +93,21 @@ if [ -e /var/lock/usm.* ]; then
 	fi
 	cleanup
 			else
-    ls /var/lock/usm.* &>/dev/null || \
-    echo 0 > $PIDLOCK
+	ls /var/lock/usm.* &>/dev/null || \
+	echo 0 > $PIDLOCK
 fi
 
 ## set repos and database directories
 export DISFILES
 export DISTROS
 for a in $DISTROS; do
-    ## ${a^^} converts variable $a to upper case
-    b=${a^^}
-    export REPO_$b=`grep -m1 -e "^\([a-z]\)" $CONFDIR/mirrors-$a.txt`
-    export DBDIR_$b=${DBDIR}/$a
-    ## FILE_$a are the dbfiles we need to download found in $DBDIR/files.conf
-    export FILES_$a="`awk -F: '/distro:'$a'/ { getline; print $NF }' $CONFDIR/files.conf`"
-    export EXTRAS_$a="`awk -F: '/distro:'$a'/ { getline;getline; print $NF }' $CONFDIR/files.conf`"
+	## ${a^^} converts variable $a to upper case
+	b=${a^^}
+	export REPO_$b=`grep -m1 -e "^\([a-z]\)" $CONFDIR/mirrors-$a.txt`
+	export DBDIR_$b=${DBDIR}/$a
+	## FILE_$a are the dbfiles we need to download found in $DBDIR/files.conf
+	export FILES_$a="`awk -F: '/distro:'$a'/ { getline; print $NF }' $CONFDIR/files.conf`"
+	export EXTRAS_$a="`awk -F: '/distro:'$a'/ { getline;getline; print $NF }' $CONFDIR/files.conf`"
 done
 export REPO_SBO=`grep -m1 -e "^\([a-z]\)" $CONFDIR/mirrors-sbo.txt`
 
@@ -124,9 +132,9 @@ fi
 ## Check for database files
 if [ -z $UPDATENOW ]; then
 for a in MANIFEST PACKAGES.TXT LIBS.TXT OPTIFEST; do
-    [ ! -f $DBDIR_SLACKWARE/$a ] && MISSINGDB=1
-    [ ! -f $DBDIR_SLACKY/$a ] && MISSINGDB=1
-    [ ! -f $DBDIR_PONCE/$a ] && MISSINGDB=1
+	[ ! -f $DBDIR_SLACKWARE/$a ] && MISSINGDB=1
+	[ ! -f $DBDIR_SLACKY/$a ] && MISSINGDB=1
+	[ ! -f $DBDIR_PONCE/$a ] && MISSINGDB=1
 done
 
 if [ $MISSINGDB ]; then
