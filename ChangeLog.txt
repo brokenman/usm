@@ -1,6 +1,7 @@
 +-------------------------
 Wed Apr 02 23:22:09 UTC 2014
 Fixed bug in system deps when all deps are resolved - Thanks slaxmax
+Added option to open folder after package download - Thanks Francois
 
 +-------------------------
 Tue Mar 18 22:09:14 UTC 2014
