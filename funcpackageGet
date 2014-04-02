@@ -162,6 +162,10 @@ done
 [ -e $TMPDIR/.message ] && rm $TMPDIR/.message
 wait
 
+## Should we merge all modules into one? (porteus only)
+if [ -e /etc/porteus-version ]; then
+	echo
+fi
 
 ## Should we convert slackware packages to porteus modules?
 if [ -e /etc/porteus-version ]; then
@@ -179,7 +183,6 @@ if [ $GUI ]; then
 		sleep 0.4
 		kill_progress 2>/dev/null
 		sleep 1
-		gtk_message2 "`gettext "Your files are ready in"`" "$STORAGE"
 	fi
 else
 	if [ `awk -F= /MODULES/'{print$2}' $CONF` == "true" ]; then
@@ -192,6 +195,12 @@ else
 		done
 	fi
 fi
+fi
+
+## Offer to open storage if in GUI
+if [ $GUI ]; then
+	gtk_yesno "`gettext "Your files are ready"`" "`gettext "Would you like to open the storage folder now?"`"
+	if [ `grep -o Yes $TMPDIR/.yesno` ]; then dbus-launch $FILEMANAGER $STORAGE &; fi
 fi
 unset LINKS LINK DISP FINALPKGS STATE
 }
