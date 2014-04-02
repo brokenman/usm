@@ -1,0 +1,111 @@
++-------------------------
+Wed Apr 02 23:22:09 UTC 2014
+Fixed bug in system deps when all deps are resolved - Thanks slaxmax
+
++-------------------------
+Tue Mar 18 22:09:14 UTC 2014
+Added support for proxies
+Added support resolve deps for single uninstalled package
+
++-------------------------
+Tue Mar 11 22:58:17 UTC 2014
+Check for gtkdialog is now only when GUI is run
+Fixed bug with update all database in CLI mode.
+
++-------------------------
+Fri Mar 7 11:31:03 UTC 2014
+System dep resolution no longer requires database
+
++-------------------------
+Mon Mar 3 11:55:12 UTC 2014
+usm-3.1.0-noarch-1.txz: updated
+Added gtkdialog frontend
+Rewrote script as hybrid cli/gui
+Fixed bug when all packages are deselected in cli
+
++-------------------------
+Thu Feb 14 10:15:03 UTC 2014
+usm-3.0.9-noarch-1.txz: updated
+Fixed bug for getting size in ponce repo (thanks slaxmax)
+Fixed search problem for a package in salix (thanks hamza)
+Fixed errors in generating ponce links
+Fixed update usm function
+
++-------------------------
+Thu Feb 13 22:10:13 UTC 2014
+usm-3.0.8-noarch-1.txz: updated
+Altered some colored text that works with light and dark backgrounds
+Altered some code to accomodate GUI
+Add option to create subfolder for downloads (thanks francois)
+Fixed bug where file remains if user cancels midway through download (thanks slaxmax)
+Fixed bug with VLC MANIFEST not containing record of symlink (thanks slaxmax)
+Added japanese locale files (thanks Neko)
+
++-------------------------
+Wed Jan 29 15:51:11 UTC 2014
+usm-3.0.7-noarch-1.txz: updated
+Fixed bad database file for slackwarepatches (thanks slaxmax)
+Added downloader search (curl/wget)
+Changed format of usm.conf file
+
++-------------------------
+Wed Jan 29 02:13:05 UTC 2014
+usm-3.0.6-noarch-1.txz: updated
+Download of packages continues if one fails (thanks slaxmax)
+Fixed fatal bug with gawk 3.1.8 outputting binary file (thanks phhpro)
+
++-------------------------
+Wed Jan 26 02:13:05 UTC 2014
+usm-3.0.5-noarch-1.txz: updated
+Fixed bad links for 32bit alien repo
+
++-------------------------
+Wed Jan 25 01:24:16 UTC 2014
+usm-3.0.4-noarch-1.txz: updated
+Fixed deselct items when more than 10 (thanks slaxmax)
+Fixed lockfile check (thanks phhpro)
+Fixed bad check for processing SUPPLIMENT and MANIFEST files.
+Removed skype_static from list of mother packages
+
++-------------------------
+Wed Jan 24 01:24:16 UTC 2014
+usm-3.0.3-noarch-1.txz: updated
+Fixed bug with getting links from ponce and salix (thanks francois)
+Added option to remove files after usm -g (thanks slaxmax)
+Added notification if launched as geust (thanks phhpro)
+Added option to rebuild slackbuild without redownloading (thanks francois)
+
++-------------------------
+Wed Jan 23 16:52:03 UTC 2014
+usm-3.0.2-noarch-1.txz: updated
+Added secondary search of slackbuilds after normal search fails
+Added usm sbo -b appname
+Fixed bug with getting link for slacky
+Added sanity check for slackbuilds function
+Added keyword search option -k
+
++-------------------------
+Wed Jan 22 02:13:29 UTC 2014
+usm-3.0.1-noarch-1.txz: updated
+Added slackbuilds support (see man page)
+Fixed slackware exclusion list in update_database()
+Fixed bad cleanup after invalid command
+Fixed sniff of package size for ponce repo
+Added check for existing file when downloading
+Added file to insert missing libraries into LIBS.TXT
+Fixed bug for updating of slackwarepatches
+Removed compat32 package from showing up as dependency
+Removed duplicated packages of same version when resolving deps
+Added usm ChangeLog.txt to options: usm -c usm
+
++-------------------------
+Mon Jan 20 11:16:24 UTC 2014
+usm-3.0.1-noarch-1.txz: updated
+### NB: USM only supports latest version 14.1
+Removed -S argument for switching versions
+Added support for 32bit
+Removed slackers (only supports 64bit current)
+Added ponce repo
+Added man page
+Fixed bug with -g argument
+Added support for single installed package dependency resolution
