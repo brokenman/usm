@@ -240,11 +240,13 @@ for b in `egrep "lib/.*|lib64/.*|bin/.*" $1|egrep -v "$EXCLUDES"|sed '/.*/s/^/\/
 done
 
 ## Give report
+if [ -f $CACHE ]; then
 echo "####################################"
 cat $CACHE
 echo
 echo "####################################"
 echo
+fi
 
 ## If dependencies are missing give a count
 if [ -e $CACHE ]; then
