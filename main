@@ -228,6 +228,7 @@ cleanup
 shift
 [ `egrep -o "\-I|nodeps" <<<$@` ] && { nodeps=0; ARG1=`sed 's/\-I//g' <<<$@|sed 's/^[ \t]*//;s/[ \t]*$//'`; } || ARG1=$1
 help_check $ARG1 && help_give "`gettext "usm -g <package>"`" "`gettext "For example: usm -g imagemagick"`"
+[ `grep -o nodep <<<$@` ] && export NODEPS=0 || unset NODEPS
 package_get $ARG1
 cleanup
 ;;
