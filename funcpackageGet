@@ -149,6 +149,7 @@ if [ $GUI ]; then
 fi
 
 ## Download files
+if [ ${LINKS[#]} -gt 1 ]; then MULTIPKG=0; else unset MULTIPKG; fi
 for a in ${LINKS[@]}; do
 	local shorty=${a##*/}
 	if [ -e $STORAGE/$shorty ]; then
