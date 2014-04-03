@@ -22,11 +22,15 @@ fi
 
 ## Check if Bob wants to skip dependcy resolution.
 ## Perhaps he forgot his medication today.
-if [ `awk -F= /RESOLVE/'{print$2}' $CONF` = "true" ]; then
-	resolve_deps $CHOICE
-	[ $GUI ] && kill `pgrep -f GTK_TAILBOXNB`
+if [ -z $NODEPS ]; then
+	if [ `awk -F= /RESOLVE/'{print$2}' $CONF` = "true" ]; then
+		resolve_deps $CHOICE
+		[ $GUI ] && kill `pgrep -f GTK_TAILBOXNB`
+	else
+		## Add the original choice to the package list for download
+		PKGLIST+=($CHOICE)
+	fi
 else
-	## Add the original choice to the package list for download
 	PKGLIST+=($CHOICE)
 fi
 
@@ -162,11 +166,6 @@ done
 [ -e $TMPDIR/.message ] && rm $TMPDIR/.message
 wait
 
-## Should we merge all modules into one? (porteus only)
-if [ -e /etc/porteus-version ]; then
-	echo
-fi
-
 ## Should we convert slackware packages to porteus modules?
 if [ -e /etc/porteus-version ]; then
 if [ $GUI ]; then
@@ -200,7 +199,7 @@ fi
 ## Offer to open storage if in GUI
 if [ $GUI ]; then
 	gtk_yesno "`gettext "Your files are ready"`" "`gettext "Would you like to open the storage folder now?"`"
-	if [ `grep -o Yes $TMPDIR/.yesno` ]; then dbus-launch $FILEMANAGER $STORAGE &; fi
+	if [ `grep -o Yes $TMPDIR/.yesno` ]; then dbus-launch $FILEMANAGER $STORAGE; fi
 fi
 unset LINKS LINK DISP FINALPKGS STATE
 }
