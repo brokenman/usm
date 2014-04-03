@@ -461,6 +461,7 @@ gtkdialog -p GTK_TAILBOXNB -c > $TDUMP
 ## $2=$TMPDIR/.menudeselect (list of files)
 gtk_menu_deselect(){
 export MODULES=`awk -F= '/MODULES=/{print$NF}' $CONF`
+export MERGE=`awk -F= '/MERGE=/{print$NF}' $CONF`
 echo '<window title="'$(gettext "Menu: ")'" icon-name="usm" width-request="450">
 	<vbox>
 		<text>
@@ -487,6 +488,14 @@ echo '<window title="'$(gettext "Menu: ")'" icon-name="usm" width-request="450">
 			<default>'$MODULES'</default>
 			<action>if false sed -i 's/MODULES=true/MODULES=false/g' $CONF</action>
 			<action>if true sed -i 's/MODULES=false/MODULES=true/g' $CONF</action>
+		</checkbox>'; fi`"'
+		'"`if [ -e /etc/porteus-version ]; then
+			echo '<checkbox>
+			<variable>chkMerge</variable>
+			<label>'$(gettext "Merge modules")'</label>
+			<default>'$MERGE'</default>
+			<action>if false sed -i 's/MERGE=true/MERGE=false/g' $CONF</action>
+			<action>if true sed -i 's/MERGE=false/MERGE=true/g' $CONF</action>
 		</checkbox>'; fi`"'
 		<hbox>
 			<button>
