@@ -1,4 +1,8 @@
 +-------------------------
+Thu Apr 03 10:38:27 UTC 2014
+Checkbox for convert to module now remembers state
+
++-------------------------
 Wed Apr 02 23:22:09 UTC 2014
 Fixed bug in system deps when all deps are resolved - Thanks slaxmax
 Added option to open folder after package download - Thanks Francois
