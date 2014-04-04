@@ -96,23 +96,36 @@ else
 	rm $CHKBOXFILE*
 fi
 
+## Were multiple packages chosen?
+[ ${#LINKS[@]} -gt 1 ] && MULTIPKG=true || unset MULTIPKG
+
 if [ $CLI ]; then
 	## If more than one package, ask if user wants to create a subdirectory
-	if [ ${#LINKS[@]} -gt 1 ]; then
+	if [ $MULTIPKG ]; then
 		echo
 		echo "`gettext " Multiple packages were detected."`"
-		read -p "`gettext " Would you like to create subfolder for the files? [y/n]"`" -n 1 -r -s && echo
+		## If more than one package chosen ask if user wants to merge into one module
+		read -p "`gettext " Would you like to merge the packages into one module? [y/n]"`" -n 1 -r -s && echo
 		if [[ $REPLY =~ ^[Yy]$ ]]; then
-			MAKESUBFOLDER=true
+			MERGE=true
+				else
+			unset MERGE
+			read -p "`gettext " Would you like to create subfolder for the files? [y/n]"`" -n 1 -r -s && echo
+			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				MAKESUBFOLDER=true
+			fi
 		fi
 	fi
+unset REPLY
 fi
 
+## Get original package name as shortened name
+ORIGLNK=${LINKS[0]}
+ORIGPKG=${ORIGLNK##*/}
+SHNAME=${ORIGPKG%-*-*}
+	
 ## Make a subfolder if chosen
 if [ "$MAKESUBFOLDER" = "true" ]; then
-	ORIGLNK=${LINKS[0]}
-	ORIGPKG=${ORIGLNK##*/}
-	SHNAME=${ORIGPKG%-*-*}
 	SUBFOLDER="/$SHNAME"
 	[ ! -d "$STORAGE$SUBFOLDER" ] && mkdir -p "$STORAGE$SUBFOLDER"
 	STORAGE="$STORAGE$SUBFOLDER"
@@ -142,6 +155,9 @@ if [ "$FINALPKGS" ]; then
 	LINKS=("${pLINKS[@]}") && unset pLINKS
 fi
 
+## Do we still have multiple packages?
+[ ${#LINKS[@]} -gt 1 ] && MULTIPKG=true || unset MULTIPKG
+
 ## Prepare download if GUI
 if [ $GUI ]; then
 	echo `basename ${LINKS[0]}` > $TMPDIR/.message
@@ -149,7 +165,6 @@ if [ $GUI ]; then
 fi
 
 ## Download files
-if [ ${LINKS[#]} -gt 1 ]; then MULTIPKG=0; else unset MULTIPKG; fi
 for a in ${LINKS[@]}; do
 	local shorty=${a##*/}
 	if [ -e $STORAGE/$shorty ]; then
@@ -169,32 +184,45 @@ wait
 
 ## Should we convert slackware packages to porteus modules?
 if [ -e /etc/porteus-version ]; then
-if [ $GUI ]; then
-	if [ "$CONVERTPKGS" == "true" ];then
-		export STATE=BUILDMODULES
-		touch $TMPDIR/proglock
-		gtk_progress "Converting"
-		for a in ${LINKS[@]}; do
-			local shorty=${a##*/}
-			echo "$shorty" > $TMPDIR/.message
-			txz2xzm $STORAGE/$shorty > $TMPDIR/.progress
-		done
-		rm $TMPDIR/proglock
-		sleep 0.4
-		kill_progress 2>/dev/null
-		sleep 1
+	if [ $GUI ]; then
+		if [ "$CONVERTPKGS" == "true" ];then
+			export STATE=BUILDMODULES
+			touch $TMPDIR/proglock
+			gtk_progress "Converting"
+			for a in ${LINKS[@]}; do
+				local shorty=${a##*/}
+				echo "$shorty" > $TMPDIR/.message
+				txz2xzm $STORAGE/$shorty > $TMPDIR/.progress
+			done
+			rm $TMPDIR/proglock
+			sleep 0.4
+			kill_progress 2>/dev/null
+			sleep 1
+		fi
+	else
+		## If user chose to merge then so be it
+		if [ $MULTIPKG ]; then
+			if [ $MERGE ]; then
+				mkdir $STORAGE/merged
+				for a in ${LINKS[@]}; do
+					mpkg=${a##*/}
+					installpkg --terse -root $STORAGE/merged $STORAGE/$mpkg
+				done
+				dir2xzm $STORAGE/merged $STORAGE/$SHNAME-$HOSTTYPE-bundle.xzm
+				rm -rf $STORAGE/merged
+			fi
+		fi
+		if [ `awk -F= /MODULES/'{print$2}' $CONF` == "true" ]; then
+			echo
+			bold "Commencing package conversion ..."
+			sleep 2
+			for a in ${LINKS[@]}; do
+				local shorty=${a##*/}
+				txz2xzm $STORAGE/$shorty
+			done
+		fi
+				
 	fi
-else
-	if [ `awk -F= /MODULES/'{print$2}' $CONF` == "true" ]; then
-		echo
-		bold "Commencing package conversion ..."
-		sleep 2
-		for a in ${LINKS[@]}; do
-			local shorty=${a##*/}
-			txz2xzm $STORAGE/$shorty
-		done
-	fi
-fi
 fi
 
 ## Offer to open storage if in GUI
