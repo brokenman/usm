@@ -490,13 +490,15 @@ echo '<window title="'$(gettext "Menu: ")'" icon-name="usm" width-request="450">
 			<action>if true sed -i 's/MODULES=false/MODULES=true/g' $CONF</action>
 		</checkbox>'; fi`"'
 		'"`if [ -e /etc/porteus-version ]; then
+		if [ $MULTIPKG ]; then
 			echo '<checkbox>
 			<variable>chkMerge</variable>
 			<label>'$(gettext "Merge modules")'</label>
 			<default>'$MERGE'</default>
 			<action>if false sed -i 's/MERGE=true/MERGE=false/g' $CONF</action>
 			<action>if true sed -i 's/MERGE=false/MERGE=true/g' $CONF</action>
-		</checkbox>'; fi`"'
+			<action>echo $chkMerge > $TMPDIR/merge.tmp</action>
+		</checkbox>'; fi; fi`"'
 		<hbox>
 			<button>
 				<label>Download</label>
