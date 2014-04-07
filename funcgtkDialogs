@@ -402,11 +402,11 @@ rm $TMPDIR/.menuchoice
 ## Stream from $TMPDIR/.stream
 ## $1=height
 gtk_tailboxnb(){
-export GTK_TAILBOXNB='<window title="'$(gettext "Processing: ")'" icon-name="usm" width-request="450" height-request="'$1'">
+export GTK_TAILBOXNB='<window title="'$(gettext "Processing: ")'" icon-name="usm" width-request="550" height-request="'$1'">
 <vbox margin="10">
 	<hseparator></hseparator>
 		<vbox>
-		<text file-monitor="true" auto-refresh="true" xalign="0" yalign="0" height-request="'$(( $1 - 30 ))'" vscrollbar-policy="1">
+		<text file-monitor="true" auto-refresh="true" xalign="0" yalign="0" height-request="'$(( $1 - 30 ))'" vscrollbar-policy="1" wrap="false">
 			<variable>txtStream</variable>
 			<input file>'$TMPDIR'/.stream</input>
 		</text>
