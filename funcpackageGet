@@ -74,6 +74,10 @@ done
 ## If total size exceeds 1024 then print in Mb
 [ $TSIZE -gt 1024 ] && { TSIZE=$((TSIZE / 10**3)); DSIZE="$TSIZE MB"; } || DSIZE="$TSIZE KB"
 
+## Were multiple packages chosen? This is for merge module dialog
+## If only one package don't show merge dialog
+[ ${#LINKS[@]} -gt 1 ] && MULTIPKG=true || unset MULTIPKG
+
 ## Give a final report
 TXTREPLINE1="`gettext "The following packages are required."`"
 TXTREPLINE2="`gettext "Total size:"`"
@@ -96,7 +100,8 @@ else
 	rm $CHKBOXFILE*
 fi
 
-## Were multiple packages chosen?
+## Were multiple packages chosen? This needs to be rerun again
+## in case user deselected some packages
 [ ${#LINKS[@]} -gt 1 ] && MULTIPKG=true || unset MULTIPKG
 
 if [ $CLI ]; then
@@ -185,6 +190,33 @@ wait
 ## Should we convert slackware packages to porteus modules?
 if [ -e /etc/porteus-version ]; then
 	if [ $GUI ]; then
+		## If user chose to merge then so be it
+		if [ -e $TMPDIR/merge.tmp ] && [ `grep true $TMPDIR/merge.tmp` ]; then
+			rm -rf $TMPDIR/merge 2>/dev/null
+			mkdir $TMPDIR/merge
+			rm -f $TMPDIR/.stream 2>/dev/null
+			touch $TMPDIR/.stream
+			gtk_tailboxnb 400 &
+			for a in ${LINKS[@]}; do
+				local mpkg=${a##*/}
+				echo "Merging: $mpkg" >> $TMPDIR/.stream
+				installpkg --terse -root $TMPDIR/merge $STORAGE/$mpkg
+			done
+			kill `pgrep -f GTK_TAILBOXNB` 2>/dev/null
+			rm $TMPDIR/.stream
+			export STATE=BUILDMODULES
+			touch $TMPDIR/proglock
+			gtk_progress "Merging bundle now"
+			local bundlepkg1=${LINKS[0]}
+			local bundlepkg=${bundlepkg1##*/}
+			local bundlename=${bundlepkg%-*}-bundle.xzm
+			dir2xzm $TMPDIR/merge $STORAGE/$bundlename > $TMPDIR/.progress
+			rm $TMPDIR/proglock
+			sleep 0.4
+			kill_progress 2>/dev/null
+			sleep 1			
+		else
+				
 		if [ "$CONVERTPKGS" == "true" ];then
 			export STATE=BUILDMODULES
 			touch $TMPDIR/proglock
@@ -198,7 +230,7 @@ if [ -e /etc/porteus-version ]; then
 			sleep 0.4
 			kill_progress 2>/dev/null
 			sleep 1
-		fi
+		fi fi
 	else
 		## If user chose to merge then so be it
 		if [ $MULTIPKG ]; then
