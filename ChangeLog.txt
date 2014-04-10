@@ -1,5 +1,9 @@
 +-------------------------
-Fri Apr 07 13:21:10 UTC 2014
+Thu Apr 10 11:50:01 UTC 2014
+Fixed bug in slackware patches database (thanks bour59)
+
++-------------------------
+Mon Apr 07 13:21:10 UTC 2014
 usm-3.1.1-noarch-1.txz: updated
 Added GUI merge packages to module for Porteus
 
