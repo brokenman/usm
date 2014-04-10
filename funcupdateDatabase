@@ -6,7 +6,7 @@
 ## Update all database files
 update_all(){
 FROMUPDATEALL=0
-for a in alien salix slackware slacky ponce; do
+for a in alien salix slackware slackwarepatches slacky ponce; do
 	update_database $a
 done
 [ $GUI ] && green "`gettext "You can now close this window"`"
