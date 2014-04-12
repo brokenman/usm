@@ -6,7 +6,7 @@
 ## Update all database files
 update_all(){
 FROMUPDATEALL=0
-for a in alien salix slackware slackwarepatches slacky ponce; do
+for a in alien salix slacky ponce slackware slackwarepatches sbo; do
 	update_database $a
 done
 [ $GUI ] && green "`gettext "You can now close this window"`"
@@ -19,6 +19,13 @@ done
 function update_database(){
 ## $1=distro 
 [ $CLI ] && bold "`gettext "Starting"`" "$1" "`gettext "database update"`"
+
+## Get online database version file
+is_online $UPDLINK 
+[ $? -eq 1 ] && { gtk_message1 "`gettext "The server could not be reached. Please try later."`"; return; }
+download $UPDLINK/configs/vercheck.txt $TMPDIR
+RDBVER=`awk -F= '/DBVER/{print$NF}' $TMPDIR/vercheck.txt`
+LDBVER=`awk -F= '/DBVER/{print$NF}' $CONF`
 
 ## Database files to download
 local FILES="$(awk -F: '/distro:'$1'$/ { getline; print $NF }' $DISFILES)"
@@ -274,6 +281,9 @@ if [ `egrep -ow "alien|salix|slackware" <<<$1` ]; then
 	mv $SDIR/PACKAGES2.TXT $SDIR/PACKAGES.TXT
 fi
 fi
+
+## Update the config file
+sed -i "s/$LDBVER/$RDBVER/g" $CONF
 
 unset LEAVEMANIFEST LEAVESUPPLIMENTS LEAVEPACKAGES exc SDIR
 [ $CLI ] && bold "$1" "`gettext " database updated."`"
