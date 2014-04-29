@@ -2,6 +2,7 @@
 Sat Apr 12 18:20:24 UTC 2014
 Fixed SBo update (Thanks Francois)
 Fixed update database version check
+Updated to usm-3.1.1-noarch-2
 
 +-------------------------
 Thu Apr 10 11:50:01 UTC 2014
