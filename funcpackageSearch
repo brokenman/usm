@@ -14,7 +14,7 @@ if [ $GUI ]; then
 	[ -z $foundlib ] && local stype=`< $TMPDIR/searchType`
 	if [ "$stype" = "package" ]; then
 		## Put search results into a variable with no spaces
-		local RESULT=`find $DBDIR -type f -name "PACKAGES.TXT"|xargs grep -i "PACKAGE NAME:.*$1.*"|sed 's/ //g'`
+		local RESULT=`find -L $DBDIR -type f -name "PACKAGES.TXT"|xargs grep -i "PACKAGE NAME:.*$1.*"|sed 's/ //g'`
 		[[ -z $RESULT ]] && { echo "`gettext "Nothing found for:"`" "'$1'" > $TMPDIR/filelist; return; exit; }
 	fi
 	if [ "$stype" = "keyword" ]; then
@@ -27,7 +27,7 @@ if [ $GUI ]; then
 	fi
 else # CLI CODE
 	## Put the search results into a variable with no spaces
-	local RESULT=`find $DBDIR -type f -name "PACKAGES.TXT"|xargs grep -i "PACKAGE NAME:.*$1.*"|sed 's/ //g'`
+	local RESULT=`find -L $DBDIR -type f -name "PACKAGES.TXT"|xargs grep -i "PACKAGE NAME:.*$1.*"|sed 's/ //g'`
 
 	## If nothing was found search slackbuilds
 	if [[ -z $RESULT ]]; then
@@ -82,10 +82,10 @@ unset RESULT
 
 ## See how many packages match the given keywords
 local ARGS=$#
-[ $ARGS -eq 1 ] && local RESULT=`find $DBDIR -name PACKAGES.TXT | xargs awk -F: '/'$1'/ && !/PACKAGE/{print$1}'`
-[ $ARGS -eq 2 ] && local RESULT=`find $DBDIR -name PACKAGES.TXT | xargs awk -F: '/'$1'/ && /'$2'/ && !/PACKAGE/{print$1}'`
-[ $ARGS -eq 3 ] && local RESULT=`find $DBDIR -name PACKAGES.TXT | xargs awk -F: '/'$1'/ && /'$2'/ && '/$3'/ && !/PACKAGE/{print$1}'`
-[ $ARGS -gt 3 ] && local RESULT=`find $DBDIR -name PACKAGES.TXT | xargs awk '/'$1'/ && /'$2'/ && '/$3'/ && !/PACKAGE/'`
+[ $ARGS -eq 1 ] && local RESULT=`find -L $DBDIR -name PACKAGES.TXT | xargs awk -F: '/'$1'/ && !/PACKAGE/{print$1}'`
+[ $ARGS -eq 2 ] && local RESULT=`find -L $DBDIR -name PACKAGES.TXT | xargs awk -F: '/'$1'/ && /'$2'/ && !/PACKAGE/{print$1}'`
+[ $ARGS -eq 3 ] && local RESULT=`find -L $DBDIR -name PACKAGES.TXT | xargs awk -F: '/'$1'/ && /'$2'/ && '/$3'/ && !/PACKAGE/{print$1}'`
+[ $ARGS -gt 3 ] && local RESULT=`find -L $DBDIR -name PACKAGES.TXT | xargs awk '/'$1'/ && /'$2'/ && '/$3'/ && !/PACKAGE/'`
 local RESCNT=`sort -u <<<$RESULT|wc -w`
 if [ $GUI ]; then
 	[ $RESCNT -gt 40 ] && { gtk_message2 "$@" "returned too many results."; cleanup; exit; }
@@ -93,7 +93,7 @@ if [ $GUI ]; then
 	RESULT1=${RESULT} && unset RESULT
 	local RESULT1=`printf '%s\n' $RESULT1|sed 's/://g'|sort -u`
 	for a in $RESULT1; do
-		RESULT+=" `find $DBDIR -type f -name "PACKAGES.TXT"|xargs grep -i "NAME:.*$a.*"|sed 's/ //g'`"
+		RESULT+=" `find -L $DBDIR -type f -name "PACKAGES.TXT"|xargs grep -i "NAME:.*$a.*"|sed 's/ //g'`"
 	done
 	## Dump the result to file so we can get it later
 	printf '%s\n' ${RESULT[@]} > $TMPDIR/.result
@@ -126,7 +126,7 @@ else
 fi
     
 ## Bob wants to find the mother of this library
-local RESULT=`find $DBDIR -name OPTIFEST|xargs grep "$1"|head -n1`
+local RESULT=`find -L $DBDIR -name OPTIFEST|xargs grep "$1"|head -n1`
 
 ## Sorry Bob, nothing there
 [ $CLI ] && [ -z "$RESULT" ] && { echo; bold "no package found for: $1"; cleanup; }
