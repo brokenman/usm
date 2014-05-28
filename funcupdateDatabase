@@ -350,7 +350,8 @@ TXTUPDUSM2="`gettext " Would you like to download it now? [y/n]"`"
 			installpkg $STORAGE/$CURRENTUSM
 			rm $TMPDIR/.progress
 			sleep 1
-			gtk_message "`gettext "USM was updated successfully"`"
+			CVER=`awk -F= '/USMVERSION/{print$NF}' $CONF`
+			gtk_message "`gettext "USM was updated successfully"`" "`gettext "You are currently using: $CVER"`" "Restart the application to complete the update." gtk-yes 500
 		else # User doesn't want to update
 			return
 		fi
