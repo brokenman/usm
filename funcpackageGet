@@ -7,7 +7,7 @@
 package_get(){
 if [ $CLI ]; then
 	## Search for the package
-	find $DBDIR -type f -name "LIBS.TXT"|xargs grep -i "^$1.*"|sed 's/ //g' > $TMPDIR/search.tmp
+	find -L $DBDIR -type f -name "LIBS.TXT"|xargs grep -i "^$1.*"|sed 's/ //g' > $TMPDIR/search.tmp
 
 	## If nothing was found then exit
 	[ `wc -l < $TMPDIR/search.tmp` -eq 0 ] && { echo; red "`gettext "Nothing found for: "`" "$1"; cleanup; }
@@ -51,7 +51,7 @@ declare -i TSIZE=0
 [ "$ARCH" = "x86_64" ] && ARCHI="x86_64" || ARCHI="x86" # Make an exception for alien repo
 for pkg in ${PKGLIST[@]}; do
 	## Find the OPTIFEST file that holds the package
-	local LONG=`find $DBDIR -type f -name "OPTIFEST"|xargs grep -i "Package:.*$pkg"`
+	local LONG=`find -L $DBDIR -type f -name "OPTIFEST"|xargs grep -i "Package:.*$pkg"`
 	local DIST=`cut -d':' -f1 <<<$LONG|awk -F/ '{print $(NF-1)}'`
 	local PKGSHORT=${pkg%-*-*-*}
 	## Based on the distro get the link, package size and total download size
@@ -295,7 +295,7 @@ until [ ${#PKGQ[@]} -eq 0 ]; do
 	{ echo; echo "`gettext "Processing: "`" $txtbld "$PKG" $rst; } | tee $TMPDIR/.stream
 	sleep 2
 	## Find the LIBS.TXT file for the package. If there is none then die like a dog.
-	TARGLIB=`find $DBDIR -type f -name "LIBS.TXT" | xargs grep -i "^$PKG" | head -n1 | awk -F: '{print$1}'`
+	TARGLIB=`find -L $DBDIR -type f -name "LIBS.TXT" | xargs grep -i "^$PKG" | head -n1 | awk -F: '{print$1}'`
 	[ $CLI ] && [ -z $TARGLIB ] && fatality "$SCRIPT $FUNCNAME $LINENO" "`gettext "Could not find:"`" "LIBS.TXT"
 	[ $GUI ] && [ -z $TARGLIB ] && { echo "`gettext "Could not find:"`" "LIBS.TXT" > $TMPDIR/.stream; gtk_message2 "`gettext "Fatal error"`" "LIBS.TXT"; exit; }
 	## Does the package have dependencies?
@@ -321,7 +321,7 @@ until [ ${#PKGQ[@]} -eq 0 ]; do
 		for a in $ALLDEPS; do
 			[ $CLI ] && echo "`gettext "Processing library:"`" "$a"
 			## Search for packages containing required library
-			local MOTHERPKG=`find $DBDIR -name OPTIFEST|xargs tac|sed -n "/$a/,/Package:/p"|awk /Package:/'{print$NF}'`
+			local MOTHERPKG=`find -L $DBDIR -name OPTIFEST|xargs tac|sed -n "/$a/,/Package:/p"|awk /Package:/'{print$NF}'`
 			## If there is multiple packages then ask user which they prefer.
 			## We should include the package size to help with the decision
 			if [[ "$MOTHERPKG" ]]; then
@@ -358,9 +358,9 @@ until [ ${#PKGQ[@]} -eq 0 ]; do
 					for b in $MOTHERPKG; do
 						## Get the short slackware name
 						MSHORT=${MOTHERPKG%-*-*-*}
-						local SIZELONG=`find $DBDIR -name PACKAGES.TXT|xargs grep -A5 $b|awk "/\(compressed/"`
+						local SIZELONG=`find -L $DBDIR -name PACKAGES.TXT|xargs grep -A5 $b|awk "/\(compressed/"`
 						## This next line is needed because slackers PACKAGES.TXT are very different from others
-						[ `wc -c <<<$SIZELONG` -lt 3 ] && local SIZELONG=`find $DBDIR -name PACKAGES.TXT|xargs grep -A5 "PACKAGE NAME:.*$MSHORT$"|awk "/\(compressed/"`
+						[ `wc -c <<<$SIZELONG` -lt 3 ] && local SIZELONG=`find -L $DBDIR -name PACKAGES.TXT|xargs grep -A5 "PACKAGE NAME:.*$MSHORT$"|awk "/\(compressed/"`
 						local PKGSIZE=`echo ${SIZELONG##*:}|sed 's/ //g'`
 						local PKGDIST=`echo ${SIZELONG%-*}|awk -F/ '{print $(NF-1)}'`
 						## Put values into array just so we can give nice columned output (damn column)
@@ -433,7 +433,7 @@ function package_get_link(){
 declare -i TSIZE=0
 for pkg in $1; do
     ## Find the OPTIFEST file/s that holds the package
-    local LONG=`find $DBDIR -type f -name "OPTIFEST"|xargs grep -i "Package:.*$pkg"|head -n1`
+    local LONG=`find -L $DBDIR -type f -name "OPTIFEST"|xargs grep -i "Package:.*$pkg"|head -n1`
     local DIST=`cut -d':' -f1 <<<$LONG|awk -F/ '{print $(NF-1)}'`
     local PKGSHORT=${pkg%-*-*-*}
     
