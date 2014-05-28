@@ -81,7 +81,7 @@ fi
 ## If dependencies are found then search for mother package.
 for a in `grep "\=>" $CACHE|sort -u|awk '{print$1}'`; do
     unset DPKG RESULT CHOICE
-    local FPKG=`find $DBDIR -name OPTIFEST|xargs grep $a|sort -u`
+    local FPKG=`find -L $DBDIR -name OPTIFEST|xargs grep $a|sort -u`
     if [ "$FPKG" ]; then
         echo "`gettext "Searching"`" $txtbld "$a:" $rst "`gettext "found"`" "`wc -w <<<$FPKG`" "`gettext "packages."`"
         ## Find the mother package
@@ -170,7 +170,7 @@ for a in "${LINKS[@]}"; do
     fi
     md5s=`md5sum < $STORAGE/$DPKG|awk '{print$1}'`
     ## We have to scrape ALL md5sum files. Easier than recoding.
-    if [[ `find $DBDIR -name CHECKSUMS.md5|xargs grep $md5s|awk -F/ '{print$NF}'|wc -l` -gt 0 ]]; then
+    if [[ `find -L $DBDIR -name CHECKSUMS.md5|xargs grep $md5s|awk -F/ '{print$NF}'|wc -l` -gt 0 ]]; then
         echo "`gettext "File verificaion is good"`"
     else
         fatality "$SCRIPT $FUNCNAME $LINENO" "`gettext "md5sum mismatch for:"`" "$DPKG"
@@ -267,7 +267,7 @@ fi
 ## If dependencies are found then search for mother package.
 for a in `grep "\=>" $CACHE|sort -u|awk '{print$1}'`; do
     unset DPKG RESULT CHOICE
-    local FPKG=`find $DBDIR -name OPTIFEST|xargs grep $a|sort -u`
+    local FPKG=`find -L $DBDIR -name OPTIFEST|xargs grep $a|sort -u`
     if [ "$FPKG" ]; then
         echo "`gettext "Searching"`" $txtbld "$a:" $rst "`gettext "found"`" "`wc -w <<<$FPKG`" "`gettext "packages."`"
         ## Find the mother package
