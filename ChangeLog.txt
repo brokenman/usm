@@ -1,5 +1,6 @@
 Tue May 27 23:39:22 UTC 2014
 Fixed missing kde packages
+Fixed bug when all packages are deselected (thanks tome)
 
 +-------------------------
 Sat Apr 12 18:20:24 UTC 2014
