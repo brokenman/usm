@@ -158,6 +158,11 @@ if [ "$FINALPKGS" ]; then
 		grep -q $a <<<${LINKS[@]} && pLINKS+=( `printf '%s\n' ${LINKS[@]}|grep $a` )
 	done
 	LINKS=("${pLINKS[@]}") && unset pLINKS
+else
+	## Nothing in FINALPKG so nothing to do
+	unset LINKS
+	echo $txtbld "`gettext "Nothing to do. Exiting."`" $rst
+	cleanup
 fi
 
 ## Do we still have multiple packages?
