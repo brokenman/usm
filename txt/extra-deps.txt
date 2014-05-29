@@ -3,8 +3,77 @@
 ## required as some required packages have no libraries against
 ## which ldd can be run
 
-# gtk-recordmydesktop
-xwininfo
+#  bluez
+bluez-firmware
+
+#  catfish
+python,pygobject,pygtk,pycairo
+
+#  docutils
+python
+
+#  frozen-bubble
+SDL_perl,perl-locale-gettext
 
 #  gajim
 python,dbus-python,dnspython,gnome-python,gst-python,notify-python,pyOpenSSL,pycurl,pyxdg,pygtk,pygobject,pycairo
+
+#  ghostscript
+ghostscript-fonts-std,gutenprint
+
+#  gmountman
+python,pycairo,pygobject,pygtk
+
+#  gonvert
+python,pycairo,pygtk,pygobject
+
+#  gtk-recordmydesktop
+recordmydesktop,python,pycairo,pygtk,pygobject,xwininfo,jack-audio-connection-kit
+
+#  hplip
+python,pycairo,pygobject,pygtk,dbus-python,PyQt,sip,ghostscript,net-snmp,notify-python,xsane,pil
+
+#  icedtea-web
+openjre
+
+#  k3b
+cdrdao
+
+#  kicad
+python
+
+#  kstreamripper
+streamripper
+
+#  lilosetup
+python,pycairo,pygobject,pygtk
+
+#  medit
+python,pycairo,pygobject,pygtk
+
+#  mutagen
+python
+
+#  nmap
+python,pycairo,pygobject,pygtk
+
+#  oggconvert
+python,gst-python,pycairo,pygobject,pygtk
+
+#  openjre
+rhino
+
+#  pygtk
+pycairo,pygobject
+
+#  qt-recordmydesktop
+recordmydesktop,python,PyQt,sip,xwininfo,jack-audio-connection-kit
+
+#  quodlibet
+python,dbus-python,gst-python,mutagen,pycairo,pygobject,pygtk
+
+#  sylpheed
+gnupg
+
+#  system-config-printer
+python,foomatic-filters,ghostscript,gutenprint,pycups,dbus-python,pycurl,notify-python,pycairo,pygobject,pygtk
