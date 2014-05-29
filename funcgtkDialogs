@@ -51,7 +51,7 @@ echo '
 gtk_message(){
 let twidth=( $5 - 50 )
 echo '
-<window window_position="1" title="'$(gettext "Message")'" icon-name="usm" allow-resize="false" width-request="'$5'">
+<window title="'$(gettext "Message")'" icon-name="usm" allow-resize="false" width-request="'$5'">
 <vbox>
 	<hbox>
 		<pixmap icon_size="5">
@@ -83,7 +83,7 @@ echo '
 ## $2=text
 gtk_yesno(){
 echo '
-<window window_position="1" title="'$(gettext "Message")'" icon-name="usm" allow-resize="false" icon-name="gtk-dialog-question">
+<window title="'$(gettext "Message")'" icon-name="usm" allow-resize="false" icon-name="gtk-dialog-question">
 <vbox>
 	<hseparator></hseparator>
 	<text><label>"'$1'"</label></text>
@@ -126,7 +126,7 @@ gtkdialog -p USM_PROCESSING -c
 gtk_filelist(){
 sed -i 's@/tmp/usmunpacked@@g' $TMPDIR/filelist.tmp
 echo '
-<window window-position="1" title="'$(gettext "File list")'" icon-name="gtk-info" resizable="true" width-request="600" height-request="400" >
+<window title="'$(gettext "File list")'" icon-name="gtk-info" resizable="true" width-request="600" height-request="400" >
 	<vbox>
 	<vbox scrollable="true">
 		<text selectable="true" can-focus="false" xalign="0" yalign="0" width-request="550">
@@ -168,7 +168,7 @@ echo '
 	</hbox>
 	</vbox>
 </window>
-' | gtkdialog -s
+' | gtkdialog -s -c
 
 ## Remove created files
 umount /tmp/usmunpacked 2>/dev/null
@@ -230,7 +230,7 @@ USM Version $USMVERSION
 $UPDLINK
 EOF
 
-echo '<window window_position="1" title="'$(gettext "About USM")'" resizable="false" width-request="400" icon-name="usm">
+echo '<window title="'$(gettext "About USM")'" resizable="false" width-request="400" icon-name="usm">
 <vbox margin="10">
 	<hseparator></hseparator>
 		<pixmap>
@@ -242,7 +242,7 @@ echo '<window window_position="1" title="'$(gettext "About USM")'" resizable="fa
 		</text>
 </vbox>
 </window>
-'| gtkdialog -s
+'| gtkdialog -s -c
 }; export -f gtk_aboutusm
 
 ## ======================================
