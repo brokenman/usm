@@ -5,3 +5,6 @@
 
 # gtk-recordmydesktop
 xwininfo
+
+#  gajim
+python,dbus-python,dnspython,gnome-python,gst-python,notify-python,pyOpenSSL,pycurl,pyxdg,pygtk,pygobject,pycairo
