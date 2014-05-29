@@ -1,3 +1,11 @@
+Tue May 28 13:38:03 UTC 2014
+Added no prompts option in config file for CLI
+User may also pass 'noprompts' arg in CLI.
+Added 'show links only' option for CLI (thanks tome)
+Added option to disable GUI message about opening target
+folder after downloading packages. (thanks tome)
+
++-------------------------
 Tue May 27 23:39:22 UTC 2014
 Fixed missing kde packages
 Fixed bug when all packages are deselected (thanks tome)
