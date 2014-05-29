@@ -104,6 +104,13 @@ fi
 ## in case user deselected some packages
 [ ${#LINKS[@]} -gt 1 ] && MULTIPKG=true || unset MULTIPKG
 
+## Check for CLI switch 'linksonly' and if there just show links
+## Useful if you want to use a download manager to get files
+if [ $CLI ]; then
+	[ $LINKSONLY ] && { echo && printf '%s\n' ${LINKS[@]}; cleanup; exit; }
+	FINALPKGS=${LINKS[@]}
+fi
+
 if [ $CLI ]; then
 	## If more than one package, ask if user wants to create a subdirectory
 	if [ $MULTIPKG ]; then
@@ -134,13 +141,6 @@ ORIGLNK=${LINKS[0]}
 ORIGPKG=${ORIGLNK##*/}
 SHNAME=${ORIGPKG%-*-*}
 
-## Check for CLI switch 'linksonly' and if there just show links
-## Useful if you want to use a download manager to get files
-if [ $CLI ]; then
-	[ $LINKSONLY ] && { echoo && printf '%s\n' ${LINKS[@]}; cleanup; exit; }
-	FINALPKGS=${LINKS[@]}
-fi
-	
 ## Make a subfolder if chosen
 if [ "$NOPROMPTS" == "false" ]; then
 	if [ "$MAKESUBFOLDER" = "true" ]; then
