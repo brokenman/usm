@@ -492,19 +492,19 @@ export USM_MAIN='
 
 </hbox>
 <hbox space-expand="true" space-fill="true">
-	<table exported-column="0" sort-function="1"
-		column-header-active="false|false|false|false">
+	<tree exported-column="0" sort-type="0"
+		column-header-active="false|false|false|false"
+		rules-hint="true">
 		<width>600</width>
 		<height>150</height>
 		<variable>tblMain</variable>
-		<label> '$(gettext "File")'                     				                 | '$(gettext "Size")'         | '$(gettext "Repo")'     		    | '$(gettext "Status")' </label>
+		<label> '$(gettext "File")'                     				                 | '$(gettext "Size")'    | '$(gettext "Repo")'     	   | '$(gettext "Status")' </label>
 		<input file>'$TMPDIR'/filelist</input>
-		<action>package_info $tblMain</action>
-		<action function="clear">txt0</action>
-		<action>refresh:txt0</action>
-		<action>enable:butDownload</action>
-		<action function="grabfocus">butDownload</action>
-	</table>
+		<action signal="cursor-changed">package_info $tblMain</action>
+		<action signal="cursor-changed" function="clear">txt0</action>
+		<action signal="cursor-changed">refresh:txt0</action>
+		<action signal="cursor-changed">enable:butDownload</action>
+	</tree>
 </hbox>
 
 	<checkbox space-expand="false" space-fill="false">
@@ -634,7 +634,7 @@ export USM_MAIN='
 		<action function="refresh">nbkMain</action>
 	</button>
 	
-	<button sensitive="false">
+	<button sensitive="false" can-default="true">
 		<variable>butDownload</variable>
 		<label>'$(gettext "Download")'</label>
 		<action>package_get $tblMain &</action>
