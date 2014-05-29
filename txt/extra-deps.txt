@@ -1,0 +1,7 @@
+## This file is to insert packages into the required packages
+## list when they are not found as dependencies. This file is
+## required as some required packages have no libraries against
+## which ldd can be run
+
+# gtk-recordmydesktop
+xwininfo
