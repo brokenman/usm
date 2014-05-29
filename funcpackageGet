@@ -30,6 +30,19 @@ if [ -z $NODEPS ]; then
 		## Add the original choice to the package list for download
 		PKGLIST+=($CHOICE)
 	fi
+	## Add functional deps here ### TODO
+	local ORIGSHORT=${CHOICE%-*-*-*}
+	## Look in extra-deps for required packages to add to $PKGLIST
+	EDEPS=`grep -A1 "^#.*$ORIGSHORT" /etc/usm/extra-deps.txt|tail -n1`
+	if [ "$EDEPS" ]; then
+		## Search slackware for EDEPS
+		for getit in `echo $EDEPS|tr ',' '\n'`; do
+			ITEXISTS=`find -L $DBDIR -type f -name "PACKAGES.TXT"|xargs grep "PACKAGE NAME:.*$getit"|awk '{print$NF}'|head -n1`
+			if [ "$ITEXISTS" ]; then
+				PKGLIST+=($ITEXISTS) || UNRES+=($ITEXISTS)
+			fi
+		done
+	fi
 else
 	PKGLIST+=($CHOICE)
 fi
