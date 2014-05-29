@@ -20,7 +20,7 @@ else
 	grep "test-package-name" <<<$CHOICE && return
 fi
 
-## Check if Bob wants to skip dependcy resolution.
+## Check if Bob wants to skip dependency resolution.
 ## Perhaps he forgot his medication today.
 if [ -z $NODEPS ]; then
 	if [ `awk -F= /RESOLVE/'{print$2}' $CONF` = "true" ]; then
@@ -107,17 +107,22 @@ fi
 if [ $CLI ]; then
 	## If more than one package, ask if user wants to create a subdirectory
 	if [ $MULTIPKG ]; then
+		if [ "$NOPROMPTS" == "false" ]; then
+		## Check the config file to see if user wants a prompt for subfolder creation
 		echo
 		echo "`gettext " Multiple packages were detected."`"
 		## If more than one package chosen ask if user wants to merge into one module
 		read -p "`gettext " Would you like to merge the packages into one module? [y/n]"`" -n 1 -r -s && echo
-		if [[ $REPLY =~ ^[Yy]$ ]]; then
-			MERGE=true
-				else
-			unset MERGE
-			read -p "`gettext " Would you like to create subfolder for the files? [y/n]"`" -n 1 -r -s && echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				MAKESUBFOLDER=true
+				MERGE=true
+					else
+				unset MERGE
+				if [ "$SUBFOLDERPROMPT" == "true" ]; then
+					read -p "`gettext " Would you like to create subfolder for the files? [y/n]"`" -n 1 -r -s && echo
+					if [[ $REPLY =~ ^[Yy]$ ]]; then
+						MAKESUBFOLDER=true
+					fi
+				fi
 			fi
 		fi
 	fi
@@ -128,25 +133,36 @@ fi
 ORIGLNK=${LINKS[0]}
 ORIGPKG=${ORIGLNK##*/}
 SHNAME=${ORIGPKG%-*-*}
+
+## Check for CLI switch 'linksonly' and if there just show links
+## Useful if you want to use a download manager to get files
+if [ $CLI ]; then
+	[ $LINKSONLY ] && { echoo && printf '%s\n' ${LINKS[@]}; cleanup; exit; }
+	FINALPKGS=${LINKS[@]}
+fi
 	
 ## Make a subfolder if chosen
-if [ "$MAKESUBFOLDER" = "true" ]; then
-	SUBFOLDER="/$SHNAME"
-	[ ! -d "$STORAGE$SUBFOLDER" ] && mkdir -p "$STORAGE$SUBFOLDER"
-	STORAGE="$STORAGE$SUBFOLDER"
+if [ "$NOPROMPTS" == "false" ]; then
+	if [ "$MAKESUBFOLDER" = "true" ]; then
+		SUBFOLDER="/$SHNAME"
+		[ ! -d "$STORAGE$SUBFOLDER" ] && mkdir -p "$STORAGE$SUBFOLDER"
+		STORAGE="$STORAGE$SUBFOLDER"
+	fi
 fi
 
 if [ $CLI ]; then
-	echo
-	read -p "`gettext " Press [r] to remove packages, [q] to quit, or enter to start downloading."`" -n 1 -r -s && echo
-	[[ $REPLY =~ ^[Qq]$ ]] && cleanup
-	if [[ $REPLY =~ ^[Rr]$ ]]; then 
-		for a in ${LINKS[@]}; do shlink=${a##*/}; tLINKS+=( $shlink ); done
-		if [ ${#tLINKS[@]} -lt 10 ];then
-			menu_deselect "${tLINKS[@]}"
-			unset tLINKS
-				else
-			menu_deselect_plusten "${tLINKS[@]}"
+	if [ "$NOPROMPTS" == "false" ]; then
+		echo
+		read -p "`gettext " Press [r] to remove packages, [q] to quit, or enter to start downloading."`" -n 1 -r -s && echo
+		[[ $REPLY =~ ^[Qq]$ ]] && cleanup
+		if [[ $REPLY =~ ^[Rr]$ ]]; then 
+			for a in ${LINKS[@]}; do shlink=${a##*/}; tLINKS+=( $shlink ); done
+			if [ ${#tLINKS[@]} -lt 10 ];then
+				menu_deselect "${tLINKS[@]}"
+				unset tLINKS
+					else
+				menu_deselect_plusten "${tLINKS[@]}"
+			fi
 		fi
 	fi
 fi
@@ -167,6 +183,8 @@ fi
 
 ## Do we still have multiple packages?
 [ ${#LINKS[@]} -gt 1 ] && MULTIPKG=true || unset MULTIPKG
+
+## Inset check for update here ### TESTING
 
 ## Prepare download if GUI
 if [ $GUI ]; then
@@ -264,8 +282,10 @@ fi
 
 ## Offer to open storage if in GUI
 if [ $GUI ]; then
-	gtk_yesno "`gettext "Your files are ready"`" "`gettext "Would you like to open the storage folder now?"`"
-	if [ `grep -o Yes $TMPDIR/.yesno` ]; then dbus-launch $FILEMANAGER $STORAGE; fi
+	if [ "$NOPROMPTS" == "false" ]; then
+		gtk_yesno "`gettext "Your files are ready"`" "`gettext "Would you like to open the storage folder now?"`"
+		if [ `grep -o Yes $TMPDIR/.yesno` ]; then dbus-launch $FILEMANAGER $STORAGE; fi
+	fi
 fi
 unset LINKS LINK DISP FINALPKGS STATE
 }
