@@ -89,6 +89,9 @@ else
 	PKGLIST+=($CHOICE)
 fi
 
+## Do one last duplicate removal. It can't hurt.
+PKGLIST=( `printf '%s\n' ${PKGLIST[@]}|sort -u` )
+
 ## Packages to download are now held in an array called ${PKGLIST[@]}
 ## Unresolved deps are held in ${UNRES[@]}
 
