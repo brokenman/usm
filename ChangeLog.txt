@@ -1,3 +1,8 @@
+Fri May 30 17:44:26 UTC 2014
+Added auto update check (thanks fanthom)
+usm-3.1.2-noarch-1.txz: updated
+
++-------------------------
 Tue May 28 13:38:03 UTC 2014
 Added no prompts option in config file for CLI
 User may also pass 'noprompts' arg in CLI.
