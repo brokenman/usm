@@ -1,10 +1,49 @@
 #!/bin/bash
 
+silent_check_update(){
+if [ ! -e $TMPDIR/checked ]; then
+if [ -e $TMPDIR/vercheck.txt ]; then
+	DBVER1=`awk -F= '/DBVER=/{print$NF}' $CONF`
+	DBVER2=`awk -F= '/DBVER=/{print$NF}' $TMPDIR/vercheck.txt` || return
+	USMVER1=`awk -F= '/USMVER=/{print$NF}' $CONF`
+	USMVER2=`awk -F= '/USMVER=/{print$NF}' $TMPDIR/vercheck.txt` || return
+	echo "DB1:$DBVER1 DB2:$DBVER2" > /tmp/out ### TESTING
+	echo "USM1:$USMVER1 USM2:$USMVER2" >> /tmp/out ### TESTING
+	[ $DBVER2 -gt $DBVER1 ] && HAVEUPDATES=0 && DBSTATUS=available || DBSTATUS="not required"
+	[ $USMVER2 -gt $USMVER1 ] && HAVEUPDATES=0 && USMSTATUS=available || USMSTATUS="not required"
+	if [ $HAVEUPDATES ]; then
+		if [ $CLI ]; then 
+			echo
+			red "`gettext "###### IMPORTANT MESSAGE ######"`"
+			cyan "`gettext "Updates are available."`" $rst
+			echo " `gettext "Program update: "`" $txtbld "$USMSTATUS" $rst
+			echo " `gettext "Database update:"`" $txtbld "$DBSTATUS" $rst
+			echo -e " `gettext "Please run:"`" $txtgreen "usm -u all" $rst "and/or" $txtgreen "usm -u usm" $rst
+			echo " This message can be disabled in $CONF"
+			red "`gettext "###############################"`"
+			sleep 5
+		else
+			gtk_message "`gettext "Updates are available"`" "Program update: $USMSTATUS --- Database update: $DBSTATUS" \
+			"`gettext "Please run the relevant update from the update menu. This automatic update check can be turned off in the settings/preferences menu."`" gtk-yes 500
+			echo checked > $TMPDIR/checked
+		fi
+	fi
+fi
+fi
+}; export -f silent_check_update
+
 ## ======================================================================
 ## package_get
 ## ----------------------------------------------------------------------
 ## Download packages
 package_get(){
+## Do a background internet check which doubles as an update check
+if [ "`awk -F= '/AUTOCHECK=/{print$NF}' $CONF`" == "true" ]; then
+	if [ ! -e $TMPDIR/vercheck.txt ]; then
+		silent_download $UPDLINK/configs/vercheck.txt $TMPDIR &
+	fi
+fi
+
 if [ $CLI ]; then
 	## Search for the package
 	find -L $DBDIR -type f -name "LIBS.TXT"|xargs grep -i "^$1.*"|sed 's/ //g' > $TMPDIR/search.tmp
@@ -200,7 +239,10 @@ fi
 ## Do we still have multiple packages?
 [ ${#LINKS[@]} -gt 1 ] && MULTIPKG=true || unset MULTIPKG
 
-## Inset check for update here ### TESTING
+## Check if the silent update check was successful
+if [ "`awk -F= '/AUTOCHECK=/{print$NF}' $CONF`" == "true" ]; then
+	silent_check_update
+fi
 
 ## Prepare download if GUI
 if [ $GUI ]; then
