@@ -283,7 +283,9 @@ fi
 fi
 
 ## Update the config file
-sed -i "s/$LDBVER/$RDBVER/g" $CONF
+if [ $FROMUPDATEALL ]; then
+[ `grep -o $LDBVER $CONF` ] && sed -i "s/$LDBVER/$RDBVER/g" $CONF
+fi
 
 unset LEAVEMANIFEST LEAVESUPPLIMENTS LEAVEPACKAGES exc SDIR
 [ $CLI ] && bold "$1" "`gettext " database updated."`"
