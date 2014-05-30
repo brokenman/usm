@@ -558,7 +558,7 @@ while [ -e $TMPDIR/.progress ]; do
 	sleep 0.3
 done
 echo 100
-rm $TMPDIR/.message
+[ -e $TMPDIR/.message ] && rm $TMPDIR/.message
 }; export -f download_progress
 
 ## ======================================
