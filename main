@@ -544,6 +544,12 @@ export USM_MAIN='
 			<label>'$(gettext "Disable prompts. Only ask essential questions.")'</label>
 			<default>'$NOPROMPTS'</default>
 		</checkbox>
+		<checkbox tooltip-text="'$(gettext "Disable the automatic update check made when internet is accessed.")'">
+			<label>'$(gettext "Enable automatic update checks.")'</label>
+			<default>'`awk -F= '/AUTOCHECK=/{print$NF}' $CONF`'</default>
+			<action>if true sed -i 's/AUTOCHECK=false/AUTOCHECK=true/g' $CONF</action>
+			<action>if false sed -i 's/AUTOCHECK=true/AUTOCHECK=false/g' $CONF</action>
+		</checkbox>
 	<text><label>""</label></text>
 	<frame '$(gettext "Storage directories")'>
 		<hbox>
