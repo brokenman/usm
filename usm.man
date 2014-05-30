@@ -56,6 +56,15 @@ Show help
 [/path/to/folder] Set local storage
 .P
 .TP
+\fBEnd Tags\fP
+.TP
+\fBlinksonly\fP - Only show links for downloads.
+.TP
+\fBnoprompts\fP - Only ask essential questions.
+.TP
+\fBnodeps\fP - Only download chosen package.
+.P
+.TP
 \fBSlackbuild options\fP
 \fBusm sbo -l\fP will list all available categories in slackbuilds.
 .br
