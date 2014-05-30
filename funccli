@@ -155,3 +155,11 @@ echo -e $txtbld "Use: $1" $rst
 echo " $2"
 cleanup
 }
+
+## ======================================================================
+## silent_download
+## ----------------------------------------------------------------------
+## silently download a file
+silent_download(){ 
+	wget --trust-server-names $1 -q -P $2
+}; export -f silent_download
