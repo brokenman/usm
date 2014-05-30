@@ -335,7 +335,12 @@ TXTUPDUSM2="`gettext " Would you like to download it now? [y/n]"`"
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
 				for a in /var/log/packages/usm-*; do removepkg $a 2>/dev/null; done
 				blue "`gettext " Installing new version now"`"
-				installpkg $STORAGE/$CURRENTUSM
+				installpkg $STORAGE/$CURRENTUSM || { bold "`gettext "Update failed"`"; cleanup; }
+				echo
+				CVER=`awk -F= '/USMVERSION/{print$NF}' $CONF`
+				echo "`gettext " USM was updated successfully"`"
+				echo "`gettext " You are currently using:"`"
+				bold "USM-v${CVER}"
 				cleanup
 			fi
 		fi
