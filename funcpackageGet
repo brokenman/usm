@@ -115,6 +115,8 @@ for pkg in ${PKGLIST[@]}; do
 	## Based on the distro get the link, package size and total download size
 	local LNKREPO=`grep -m1 -e "^\([a-z]\)" $CONFDIR/mirrors-$DIST.txt`
 	local MID=`grep -A1 "NAME:.*$pkg" $DBDIR/$DIST/PACKAGES.TXT|tail -n1|awk '{print$NF}'|sed  's ..  '`
+	[ "$DIST" = "freestyler" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER/slackware && \
+	local MID=`grep -A2 "NAME:.*$pkg" $DBDIR/$DIST/PACKAGES.TXT|tail -n1|awk '{print$NF}'|sed  's ..  '`
 	[ "$DIST" = "slackware" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
 	[ "$DIST" = "slackwarepatches" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
 	[ "$DIST" = "slacky" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
@@ -521,6 +523,7 @@ for pkg in $1; do
     ## Based on the distro get the link, package size and total download size
     local LNKREPO=`grep -m1 -e "^\([a-z]\)" $CONFDIR/mirrors-$DIST.txt`
     [ "$ARCH" = "x86_64" ] && ARCHI="x86_64" || ARCHI="x86"
+    [ "$DIST" = "freestyler" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER/slackware
     [ "$DIST" = "slackware" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
     [ "$DIST" = "slackwarepatches" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER/patches
     [ "$DIST" = "slacky" ] && local EXTRA=slackware$SLACKSUFFIX/$SLACKVER
@@ -528,6 +531,7 @@ for pkg in $1; do
     [ "$DIST" = "salix" ] && local EXTRA=$ARCH/$SLACKVER/salix
     [ "$DIST" = "ponce" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
     local MID=`grep -A1 "NAME:.*$pkg" $DBDIR/$DIST/PACKAGES.TXT|tail -n1|awk '{print$NF}'|sed  's ..  '`
+    [ "$DIST" = "freestyler" ] && local MID=`grep -A2 "NAME:.*$pkg" $DBDIR/$DIST/PACKAGES.TXT|tail -n1|awk '{print$NF}'|sed  's ..  '`
     [ "$DIST" = "ponce" ] && local MID=packages
     local LINK=$LNKREPO/$EXTRA/$MID/$pkg
     LINKS+=( $LINK )
