@@ -48,7 +48,7 @@ dist: check
 	rm -rf $(TARGET)-$(VERSION)
 
 install: check
-	mkdir -p $(DESTDIR)$(LOCALSTATEDIR)/{local,alien,salix,slackware,slacky,ponce}
+	mkdir -p $(DESTDIR)$(LOCALSTATEDIR)/{local,alien,salix,slackware,slacky,ponce,freestyler}
 	mkdir -p $(DESTDIR)$(BINDIR)
 	mkdir -p $(DESTDIR)$(DATADIR)/applications
 	mkdir -p $(DESTDIR)$(DATADIR)/icons/hicolor/48x48/apps
