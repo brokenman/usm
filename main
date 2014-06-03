@@ -164,9 +164,10 @@ case $1 in
 ## TRANSLATORS: Do not translate <distro>
 [ "$2" == "?" ] && help_give "`gettext "usm -u <distro>"`" "`gettext "For example: usm -u slackware"`"
 shift
-[ ! `egrep -o "slackware|slackwarepatches|slacky|salix|alien|ponce|sbo|usm|all" <<<"$1"` ] && \
+[ ! `egrep -o "freestyler|slackware|slackwarepatches|slacky|salix|alien|ponce|sbo|usm|all" <<<"$1"` ] && \
 help_give "`gettext "usm -u <distro>"`" "`gettext "For example: usm -u slackware"`"
 [ "$1" == "sbo" ] && { update_database sbo; cleanup; }
+[ "$1" == "freestyler" ] && { update_database freestyler; cleanup; }
 [ "$1" == "slackware" ] && { update_database slackware; cleanup; }
 [ "$1" == "slackwarepatches" ] && { update_database slackwarepatches; cleanup; }
 [ "$1" == "slacky" ] && { update_database slacky; cleanup; }
@@ -191,6 +192,7 @@ if [ -z $2 ]; then
 	echo "`gettext "++++++++++++++++++++++++++++++"`"
 	echo "`gettext "usm application information"`"
 	echo
+	echo "`gettext "USM version: "`" "$USMVERSION"
 	echo "`gettext "Current storage:"`" "$STORAGE"
 	echo "`gettext "Current arch:"`" "$ARCH"
 	echo "`gettext "Slackware"`" "$SLACKVER"
