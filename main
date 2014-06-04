@@ -166,6 +166,10 @@ case $1 in
 shift
 [ ! `egrep -o "freestyler|slackware|slackwarepatches|slacky|salix|alien|ponce|sbo|usm|all" <<<"$1"` ] && \
 help_give "`gettext "usm -u <distro>"`" "`gettext "For example: usm -u slackware"`"
+## Remove version check file if exists
+[ -e $TMPDIR/vercheck.txt ] && rm $TMPDIR/vercheck.txt
+## Remove the extra deps file so a new one is downloaded
+[ -e $CONFDIR/extra-deps.txt ] && rm $CONFDIR/extra-deps.txt
 [ "$1" == "sbo" ] && { update_database sbo; cleanup; }
 [ "$1" == "freestyler" ] && { update_database freestyler; cleanup; }
 [ "$1" == "slackware" ] && { update_database slackware; cleanup; }
