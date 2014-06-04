@@ -359,12 +359,13 @@ TXTUPDUSM2="`gettext " Would you like to download it now? [y/n]"`"
 		read -p "$TXTUPDUSM2" -n 1 -r -s && echo
 		if [[ $REPLY =~ ^[Yy]$ ]]; then
 			[ ! -d $STORAGE ] && mkdir $STORAGE
+			[ -e $STORAGE/$CURRENTUSM ] && rm $STORAGE/$CURRENTUSM
 			download $UPDLINK/$CURRENTUSM $STORAGE
 			read -p "`gettext " Would you like to install it now? [y/n]"`" -n 1 -r -s && echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
 				for a in /var/log/packages/usm-*; do removepkg $a 2>/dev/null; done
 				blue "`gettext " Installing new version now"`"
-				installpkg $STORAGE/$CURRENTUSM || { bold "`gettext "Update failed"`"; cleanup; }
+				installpkg --terse $STORAGE/$CURRENTUSM || { bold "`gettext "Update failed"`"; cleanup; }
 				echo
 				CVER=`awk -F= '/USMVERSION/{print$NF}' $CONF`
 				echo "`gettext " USM was updated successfully"`"
@@ -377,6 +378,7 @@ TXTUPDUSM2="`gettext " Would you like to download it now? [y/n]"`"
 		gtk_yesno "$TXTUPDUSM1" "$TXTUPDUSM2"
 		if [ `grep "Yes" $TMPDIR/.yesno` ]; then
 			[ ! -d $STORAGE ] && mkdir $STORAGE
+			[ -e $STORAGE/$CURRENTUSM ] && rm $STORAGE/$CURRENTUSM
 			echo "Waiting" > $TMPDIR/.message
 			touch $TMPDIR/.progress
 			gtk_download "`gettext "Downloading"`"
