@@ -21,9 +21,18 @@ function update_database(){
 [ $CLI ] && bold "`gettext "Starting"`" "$1" "`gettext "database update"`"
 
 ## Get online database version file
-is_online $UPDLINK 
-[ $? -eq 1 ] && { gtk_message1 "`gettext "The server could not be reached. Please try later."`"; return; }
-download $UPDLINK/configs/vercheck.txt $TMPDIR
+if [ ! -e $TMPDIR/isonline ]; then
+	is_online $UPDLINK
+	## Only download vercheck file if it does not exist
+	[ $? -eq 1 ] && { gtk_message1 "`gettext "The server could not be reached. Please try later."`"; return; } || \
+	download $UPDLINK/configs/vercheck.txt $TMPDIR && touch $TMPDIR/isonline
+fi
+
+## Get latest extra-deps file
+if [ ! -e $CONFDIR/extra-deps.txt ]; then
+	download $UPDLINK/configs/extra-deps.txt $CONFDIR
+fi
+
 RDBVER=`awk -F= '/DBVER/{print$NF}' $TMPDIR/vercheck.txt`
 LDBVER=`awk -F= '/DBVER/{print$NF}' $CONF`
 
