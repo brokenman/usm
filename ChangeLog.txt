@@ -1,5 +1,16 @@
+Wed Jun 04 09:35:09 UTC 2014
+Moved extra-deps online. It is downloaded
+with each database update so it can be updated instantly.
+Improved extra-deps check
+Streamlined online check (only checked once)
+Streamlined download of vercheck (downloaded once)
+
++-------------------------
+
 Tue Jun 03 23:55:05 UTC 2014
 Added freestyler repo
+
++-------------------------
 
 Fri May 30 17:44:26 UTC 2014
 Added auto update check (thanks fanthom)
