@@ -3,6 +3,12 @@
 ## required as some required packages have no libraries against
 ## which ldd can be run
 
+#  aline
+tk
+
+#  atunes
+jdk
+
 #  bluez
 bluez-firmware
 
@@ -34,6 +40,9 @@ recordmydesktop,python,pycairo,pygtk,pygobject,xwininfo,jack-audio-connection-ki
 python,pycairo,pygobject,pygtk,dbus-python,PyQt,sip,ghostscript,net-snmp,notify-python,xsane,pil
 
 #  icedtea-web
+openjre
+
+# ImageJ
 openjre
 
 #  k3b
