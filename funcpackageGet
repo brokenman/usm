@@ -69,7 +69,7 @@ if [ -z $NODEPS ]; then
 		## Add the original choice to the package list for download
 		PKGLIST+=($CHOICE)
 	fi
-	## Add functional deps here ### TODO
+	## Add extra deps
 	local ORIGSHORT=${CHOICE%-*-*-*}
 	## Look in extra-deps for required packages to add to $PKGLIST
 	EDEPS=`grep -A1 "^#.* $ORIGSHORT" $CONFDIR/extra-deps.txt|tail -n1`
@@ -77,7 +77,7 @@ if [ -z $NODEPS ]; then
 		## Search slackware for EDEPS
 		for getit in `echo $EDEPS|tr ',' '\n'`; do
 			## Only if it does not exist already in VLP
-			if [[ ! `ls /var/log/packages|grep ${getit}-` ]]; then
+			if [[ ! `ls /var/log/packages|grep "^${getit}-[0-9]"` ]]; then
 				ITEXISTS=`find -L $DBDIR -type f -name "PACKAGES.TXT"|xargs grep "PACKAGE NAME:.* ${getit}-[0-9]"|awk '{print$NF}'|head -n1`
 				if [ "$ITEXISTS" ]; then
 					PKGLIST+=($ITEXISTS) || UNRES+=($ITEXISTS)
@@ -89,7 +89,7 @@ else
 	PKGLIST+=($CHOICE)
 fi
 
-## Do one last duplicate removal. It can't hurt.
+# Do one last duplicate removal. It can't hurt.
 PKGLIST=( `printf '%s\n' ${PKGLIST[@]}|sort -u` )
 
 ## Packages to download are now held in an array called ${PKGLIST[@]}
