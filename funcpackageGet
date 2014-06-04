@@ -78,7 +78,7 @@ if [ -z $NODEPS ]; then
 		for getit in `echo $EDEPS|tr ',' '\n'`; do
 			## Only if it does not exist already in VLP
 			if [[ ! `ls /var/log/packages|grep ${getit}-` ]]; then
-				ITEXISTS=`find -L $DBDIR -type f -name "PACKAGES.TXT"|xargs grep "PACKAGE NAME:.* ${getit}-"|awk '{print$NF}'|head -n1`
+				ITEXISTS=`find -L $DBDIR -type f -name "PACKAGES.TXT"|xargs grep "PACKAGE NAME:.* ${getit}-[0-9]"|awk '{print$NF}'|head -n1`
 				if [ "$ITEXISTS" ]; then
 					PKGLIST+=($ITEXISTS) || UNRES+=($ITEXISTS)
 				fi
