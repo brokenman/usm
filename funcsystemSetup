@@ -7,7 +7,7 @@
 update_local_libs(){
 rm $LOCALDB/libs.txt 2>/dev/null
 [ "$ARCH" = "x86_64" ] && local LIBS="/usr/lib /usr/lib64 /lib /lib64 /usr/local/lib64" || local LIBS="/usr/lib /lib /usr/local/lib"
-for a in $LIBS; do find $a -regextype "posix-extended" -iregex '.*\.(so|so.[0-9].*)' >> $LOCALDB/libs.txt; done
+find $LIBS -regextype "posix-extended" -iregex '.*\.(so|so.[0-9].*)' >> $LOCALDB/libs.txt
 }
 
 system_setup(){
@@ -158,7 +158,7 @@ fi
 
 ## Create file with list of local libs
 [ ! -d $LOCALDB ] && mkdir -p $LOCALDB
-[ ! -e $LOCALDB/libs.txt ] && update_local_libs &
+update_local_libs &
 
 ## Create files required for gtkdialog screens
 cat > $TMPDIR/welcome << EOF

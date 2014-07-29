@@ -6,7 +6,7 @@
 ## Update all database files
 update_all(){
 FROMUPDATEALL=0
-for a in alien salix slacky ponce slackware slackwarepatches freestyler sbo; do
+for a in alien salix slacky ponce slackware slackwarepatches sbo; do
 	update_database $a
 done
 [ $GUI ] && green "`gettext "You can now close this window"`"
@@ -107,26 +107,6 @@ case $1 in
 	local exc=$(awk -F: '/distro:'$1'$/ { getline;getline;getline; print $NF }' $CONFDIR/files.conf | \
 	sed -e 's/ / \\\/'$1'\\\//g' -e s'/ /|/g' -e 's/^/\\\/'$1'\\\//')
 	LEAVEMANIFEST=0
-;;
-	freestyler )
-	for a in $FILES; do
-		if [ $CLI ]; then
-			download $REPO_FREESTYLER/slackware${SLACKSUFFIX}-$SLACKVER/slackware/$a $SDIR
-		else
-			echo "$a" > $TMPDIR/.message
-			wget $WFLAGS -o $TMPDIR/.progress $REPO_FREESTYLER/slackware${SLACKSUFFIX}-$SLACKVER/slackware/$a -P $SDIR
-			sleep 0.4
-		fi		
-	done
-	for a in $EXTRAS; do
-		if [ $CLI ]; then
-			download $REPO_FREESTYLER/slackware${SLACKSUFFIX}-$SLACKVER/slackware/$a $SDIR
-		else
-			echo "$a" > $TMPDIR/.message
-			wget $WFLAGS -o $TMPDIR/.progress $REPO_FREESTYLER/slackware${SLACKSUFFIX}-$SLACKVER/slackware/$a -P $SDIR
-			sleep 0.4
-		fi
-	done
 ;;
 	slackware )
 	for a in $FILES; do
@@ -359,7 +339,7 @@ TXTUPDUSM2="`gettext " Would you like to download it now? [y/n]"`"
 		read -p "$TXTUPDUSM2" -n 1 -r -s && echo
 		if [[ $REPLY =~ ^[Yy]$ ]]; then
 			[ ! -d $STORAGE ] && mkdir $STORAGE
-			[ -e $STORAGE/$CURRENTUSM ] && rm $STORAGE/$CURRENTUSM
+			find $STORAGE -type f -name "usm-*noarch*.txz"|xargs rm 2>/dev/null
 			download $UPDLINK/$CURRENTUSM $STORAGE
 			read -p "`gettext " Would you like to install it now? [y/n]"`" -n 1 -r -s && echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -378,7 +358,7 @@ TXTUPDUSM2="`gettext " Would you like to download it now? [y/n]"`"
 		gtk_yesno "$TXTUPDUSM1" "$TXTUPDUSM2"
 		if [ `grep "Yes" $TMPDIR/.yesno` ]; then
 			[ ! -d $STORAGE ] && mkdir $STORAGE
-			[ -e $STORAGE/$CURRENTUSM ] && rm $STORAGE/$CURRENTUSM
+			find $STORAGE -type f -name "usm-*noarch*.txz"|xargs rm 2>/dev/null
 			echo "Waiting" > $TMPDIR/.message
 			touch $TMPDIR/.progress
 			gtk_download "`gettext "Downloading"`"

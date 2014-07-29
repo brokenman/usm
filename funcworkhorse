@@ -33,3 +33,15 @@ fi
 
 su - $USER -c "$OPENER http://google.com"
 }; export -f browser_open
+
+set_storage(){
+local PTH=$1
+[ ! -d $PTH ] && { echo "$1 does not exist."; cleanup; }
+[ ! -w $PTH ] && { echo "$1 is not writable."; cleanup; }
+local CVAL=`grep "STORAGE=" $CONF`
+local NVAL="STORAGE=$PTH"
+sed -i "s@$CVAL@$NVAL@g" $CONF || { echo "Failed!"; cleanup; }
+echo
+echo "Storage updated: $PTH"
+cleanup
+}

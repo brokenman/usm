@@ -73,6 +73,7 @@ GTKDMIN=0.8.3
 . $DATADIR/funcchangelogs
 . $DATADIR/funcslackbuilds
 . $DATADIR/funcsystemDeps
+. $DATADIR/funcworkhorse
 
 export TMPDIR
 export DBDIR
@@ -164,14 +165,13 @@ case $1 in
 ## TRANSLATORS: Do not translate <distro>
 [ "$2" == "?" ] && help_give "`gettext "usm -u <distro>"`" "`gettext "For example: usm -u slackware"`"
 shift
-[ ! `egrep -o "freestyler|slackware|slackwarepatches|slacky|salix|alien|ponce|sbo|usm|all" <<<"$1"` ] && \
+[ ! `egrep -o "slackware|slackwarepatches|slacky|salix|alien|ponce|sbo|usm|all" <<<"$1"` ] && \
 help_give "`gettext "usm -u <distro>"`" "`gettext "For example: usm -u slackware"`"
 ## Remove version check file if exists
 [ -e $TMPDIR/vercheck.txt ] && rm $TMPDIR/vercheck.txt
 ## Remove the extra deps file so a new one is downloaded
 [ -e $CONFDIR/extra-deps.txt ] && rm $CONFDIR/extra-deps.txt
 [ "$1" == "sbo" ] && { update_database sbo; cleanup; }
-[ "$1" == "freestyler" ] && { update_database freestyler; cleanup; }
 [ "$1" == "slackware" ] && { update_database slackware; cleanup; }
 [ "$1" == "slackwarepatches" ] && { update_database slackwarepatches; cleanup; }
 [ "$1" == "slacky" ] && { update_database slacky; cleanup; }
@@ -211,13 +211,9 @@ cleanup
 ##################################### SET
 -S|-set|--set|set )
 help_check $2 && help_give "`gettext "usm set <storage>"`" "`gettext "For example: usm set /root/usm"`"
-## Set version
-if [ `grep -o "[0-9][0-9].[0-9].*" <<<$2` ] || [ "$2" = "slackware-current" ]; then
-	slackware_set_version $2
-fi
-
-if [[ `grep -o "/" <<<"$2"` ]]; then
-	set_storage "$2"
+shift
+if [[ `grep -o "/" <<<"$1"` ]]; then
+	set_storage "$1"
 fi
 cleanup
 ;;
@@ -396,7 +392,7 @@ export USM_MAIN='
 ## =================== SETTINGS MENU ================== ##
 	<menu label="'$(gettext "_Settings")'" use-underline="true" icon-name="gtk-execute">
 	<menuitem icon="gtk-edit"><label>'$(gettext "Edit configuration file")'</label>
-		<action>gtk_editFile '$CONF'</action>
+		<action>gtk_editFile '$CONF' &</action>
 	</menuitem>
 	<menuitem icon="gtk-preferences"><label>'$(gettext "Preferences")'</label>
 		<action>echo 1 > '$PIDLOCK'</action>
@@ -408,19 +404,19 @@ export USM_MAIN='
 	<separator></separator>
 	
 	<menuitem icon="gtk-edit"><label>'$(gettext "Edit alien mirror")'</label>
-		<action>gtk_editFile $CONFDIR/mirrors-alien.txt</action>
+		<action>gtk_editFile '$CONFDIR/mirrors-alien.txt' &</action>
 	</menuitem>
 	<menuitem icon="gtk-edit"><label>'$(gettext "Edit salix mirror")'</label>
-		<action>gtk_editFile $CONFDIR/mirrors-salix.txt</action>
+		<action>gtk_editFile '$CONFDIR/mirrors-salix.txt' &</action>
 	</menuitem>
 	<menuitem icon="gtk-edit"><label>'$(gettext "Edit slackware mirror")'</label>
-		<action>gtk_editFile $CONFDIR/mirrors-slackware.txt</action>
+		<action>gtk_editFile '$CONFDIR/mirrors-slackware.txt' &</action>
 	</menuitem>
 	<menuitem icon="gtk-edit"><label>'$(gettext "Edit slacky mirror")'</label>
-		<action>gtk_editFile $CONFDIR/mirrors-slacky.txt</action>
+		<action>gtk_editFile '$CONFDIR/mirrors-slacky.txt' &</action>
 	</menuitem>
 	<menuitem icon="gtk-edit"><label>'$(gettext "Edit ponce mirror")'</label>
-		<action>gtk_editFile $CONFDIR/mirrors-ponce.txt</action>
+		<action>gtk_editFile '$CONFDIR/mirrors-ponce.txt' &</action>
 	</menuitem>
 	</menu>
 
@@ -548,7 +544,9 @@ export USM_MAIN='
 		</checkbox>'; fi`"'
 		<checkbox tooltip-text="'$(gettext "Do not show prompt to open target folder. For CLI this means do NOT show any prompts.")'">
 			<label>'$(gettext "Disable prompts. Only ask essential questions.")'</label>
-			<default>'$NOPROMPTS'</default>
+			<default>'`awk -F= '/NOPROMPTS=/{print$NF}' $CONF`'</default>
+			<action>if true sed -i 's/NOPROMPTS=false/NOPROMPTS=true/g' $CONF</action>
+			<action>if false sed -i 's/NOPROMPTS=true/NOPROMPTS=false/g' $CONF</action>
 		</checkbox>
 		<checkbox tooltip-text="'$(gettext "Disable the automatic update check made when internet is accessed.")'">
 			<label>'$(gettext "Enable automatic update checks.")'</label>

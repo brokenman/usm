@@ -7,12 +7,10 @@ if [ -e $TMPDIR/vercheck.txt ]; then
 	DBVER2=`awk -F= '/DBVER=/{print$NF}' $TMPDIR/vercheck.txt` || return
 	USMVER1=`awk -F= '/USMVER=/{print$NF}' $CONF`
 	USMVER2=`awk -F= '/USMVER=/{print$NF}' $TMPDIR/vercheck.txt` || return
-	echo "DB1:$DBVER1 DB2:$DBVER2" > /tmp/out ### TESTING
-	echo "USM1:$USMVER1 USM2:$USMVER2" >> /tmp/out ### TESTING
 	[ $DBVER2 -gt $DBVER1 ] && HAVEUPDATES=0 && DBSTATUS=available || DBSTATUS="not required"
 	[ $USMVER2 -gt $USMVER1 ] && HAVEUPDATES=0 && USMSTATUS=available || USMSTATUS="not required"
 	if [ $HAVEUPDATES ]; then
-		if [ $CLI ]; then 
+		if [ $CLI ]; then
 			echo
 			red "`gettext "###### IMPORTANT MESSAGE ######"`"
 			cyan "`gettext "Updates are available."`" $rst
@@ -21,7 +19,7 @@ if [ -e $TMPDIR/vercheck.txt ]; then
 			echo -e " `gettext "Please run:"`" $txtgreen "usm -u all" $rst "and/or" $txtgreen "usm -u usm" $rst
 			echo " This message can be disabled in $CONF"
 			red "`gettext "###############################"`"
-			sleep 5
+			sleep 3
 		else
 			gtk_message "`gettext "Updates are available"`" "Program update: $USMSTATUS --- Database update: $DBSTATUS" \
 			"`gettext "Please run the relevant update from the update menu. This automatic update check can be turned off in the settings/preferences menu."`" gtk-yes 500
@@ -38,10 +36,9 @@ fi
 ## Download packages
 package_get(){
 ## Do a background internet check which doubles as an update check
-if [ "`awk -F= '/AUTOCHECK=/{print$NF}' $CONF`" == "true" ]; then
-	if [ ! -e $TMPDIR/vercheck.txt ]; then
-		silent_download $UPDLINK/configs/vercheck.txt $TMPDIR &
-	fi
+if [ "`awk -F= '/^AUTOCHECK=/{print$NF}' $CONF`" == "true" ]; then
+	rm $TMPDIR/vercheck.txt 2>/dev/null
+	silent_download $UPDLINK/configs/vercheck.txt $TMPDIR &
 fi
 
 if [ $CLI ]; then
@@ -59,6 +56,7 @@ else
 	grep "test-package-name" <<<$CHOICE && return
 fi
 
+ORIGINAL=${CHOICE}
 ## Check if Bob wants to skip dependency resolution.
 ## Perhaps he forgot his medication today.
 if [ -z $NODEPS ]; then
@@ -70,7 +68,7 @@ if [ -z $NODEPS ]; then
 		PKGLIST+=($CHOICE)
 	fi
 	## Add extra deps
-	local ORIGSHORT=${CHOICE%-*-*-*}
+	local ORIGSHORT=${ORIGINAL%-*-*-*}
 	## Look in extra-deps for required packages to add to $PKGLIST
 	EDEPS=`grep -A1 "^#.* $ORIGSHORT" $CONFDIR/extra-deps.txt|tail -n1`
 	if [ "$EDEPS" ]; then
@@ -115,8 +113,7 @@ for pkg in ${PKGLIST[@]}; do
 	## Based on the distro get the link, package size and total download size
 	local LNKREPO=`grep -m1 -e "^\([a-z]\)" $CONFDIR/mirrors-$DIST.txt`
 	local MID=`grep -A1 "NAME:.*$pkg" $DBDIR/$DIST/PACKAGES.TXT|tail -n1|awk '{print$NF}'|sed  's ..  '`
-	[ "$DIST" = "freestyler" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER/slackware && \
-	local MID=`grep -A2 "NAME:.*$pkg" $DBDIR/$DIST/PACKAGES.TXT|tail -n1|awk '{print$NF}'|sed  's ..  '`
+
 	[ "$DIST" = "slackware" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
 	[ "$DIST" = "slackwarepatches" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
 	[ "$DIST" = "slacky" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
@@ -174,7 +171,7 @@ fi
 if [ $CLI ]; then
 	## If more than one package, ask if user wants to create a subdirectory
 	if [ $MULTIPKG ]; then
-		if [ "$NOPROMPTS" == "false" ]; then
+		if [ `awk '/^NOPROMPTS/ && /false/' $CONF` ]; then
 		## Check the config file to see if user wants a prompt for subfolder creation
 		echo
 		echo "`gettext " Multiple packages were detected."`"
@@ -197,12 +194,12 @@ unset REPLY
 fi
 
 ## Get original package name as shortened name
-ORIGLNK=${LINKS[0]}
+ORIGLNK=`printf '%s\n' ${LINKS[@]}|grep $ORIGINAL`
 ORIGPKG=${ORIGLNK##*/}
 SHNAME=${ORIGPKG%-*-*}
 
 ## Make a subfolder if chosen
-if [ "$NOPROMPTS" == "false" ]; then
+if [ `awk '/^NOPROMPTS/ && /false/' $CONF` ]; then
 	if [ "$MAKESUBFOLDER" = "true" ]; then
 		SUBFOLDER="/$SHNAME"
 		[ ! -d "$STORAGE$SUBFOLDER" ] && mkdir -p "$STORAGE$SUBFOLDER"
@@ -211,7 +208,7 @@ if [ "$NOPROMPTS" == "false" ]; then
 fi
 
 if [ $CLI ]; then
-	if [ "$NOPROMPTS" == "false" ]; then
+	if [ `awk '/^NOPROMPTS/ && /false/' $CONF` ]; then
 		echo
 		read -p "`gettext " Press [r] to remove packages, [q] to quit, or enter to start downloading."`" -n 1 -r -s && echo
 		[[ $REPLY =~ ^[Qq]$ ]] && cleanup
@@ -293,14 +290,13 @@ if [ -e /etc/porteus-version ]; then
 			export STATE=BUILDMODULES
 			touch $TMPDIR/proglock
 			gtk_progress "Merging bundle now"
-			local bundlepkg1=${LINKS[0]}
-			local bundlepkg=${bundlepkg1##*/}
+			local bundlepkg=${ORIGPKG}
 			local bundlename=${bundlepkg%-*}-bundle.xzm
 			dir2xzm $TMPDIR/merge $STORAGE/$bundlename > $TMPDIR/.progress
 			rm $TMPDIR/proglock
 			sleep 0.4
 			kill_progress 2>/dev/null
-			sleep 1			
+			sleep 1
 		else
 				
 		if [ "$CONVERTPKGS" == "true" ];then
@@ -326,8 +322,12 @@ if [ -e /etc/porteus-version ]; then
 					mpkg=${a##*/}
 					installpkg --terse -root $STORAGE/merged $STORAGE/$mpkg
 				done
-				dir2xzm $STORAGE/merged $STORAGE/$SHNAME-$HOSTTYPE-bundle.xzm
+				local bundlepkg=${ORIGPKG}
+				local bundlename=${bundlepkg%-*}-bundle.xzm
+				dir2xzm $STORAGE/merged $STORAGE/$bundlename
 				rm -rf $STORAGE/merged
+				echo
+				echo "$STORAGE/$bundlename is ready."
 			fi
 		fi
 		if [ `awk -F= /MODULES/'{print$2}' $CONF` == "true" ]; then
@@ -345,7 +345,7 @@ fi
 
 ## Offer to open storage if in GUI
 if [ $GUI ]; then
-	if [ "$NOPROMPTS" == "false" ]; then
+	if [ `awk '/^NOPROMPTS/ && /false/' $CONF` ]; then
 		gtk_yesno "`gettext "Your files are ready"`" "`gettext "Would you like to open the storage folder now?"`"
 		if [ `grep -o Yes $TMPDIR/.yesno` ]; then dbus-launch $FILEMANAGER $STORAGE; fi
 	fi
@@ -523,7 +523,6 @@ for pkg in $1; do
     ## Based on the distro get the link, package size and total download size
     local LNKREPO=`grep -m1 -e "^\([a-z]\)" $CONFDIR/mirrors-$DIST.txt`
     [ "$ARCH" = "x86_64" ] && ARCHI="x86_64" || ARCHI="x86"
-    [ "$DIST" = "freestyler" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER/slackware
     [ "$DIST" = "slackware" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
     [ "$DIST" = "slackwarepatches" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER/patches
     [ "$DIST" = "slacky" ] && local EXTRA=slackware$SLACKSUFFIX/$SLACKVER
@@ -531,7 +530,6 @@ for pkg in $1; do
     [ "$DIST" = "salix" ] && local EXTRA=$ARCH/$SLACKVER/salix
     [ "$DIST" = "ponce" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
     local MID=`grep -A1 "NAME:.*$pkg" $DBDIR/$DIST/PACKAGES.TXT|tail -n1|awk '{print$NF}'|sed  's ..  '`
-    [ "$DIST" = "freestyler" ] && local MID=`grep -A2 "NAME:.*$pkg" $DBDIR/$DIST/PACKAGES.TXT|tail -n1|awk '{print$NF}'|sed  's ..  '`
     [ "$DIST" = "ponce" ] && local MID=packages
     local LINK=$LNKREPO/$EXTRA/$MID/$pkg
     LINKS+=( $LINK )

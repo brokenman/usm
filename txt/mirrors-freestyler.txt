@@ -1,5 +1,0 @@
-# List of alien freestyler mirrors
-# Structure: $VER/$ARCH
-
-# UNITED STATES - Los Angeles
-http://porteus-apps.org/slackware

@@ -18,7 +18,8 @@ One or more errors occurred while usm was running:
 fi
 echo
 
-( rm -f /var/lock/usm* && rm -rf $TMPDIR ) &>/dev/null
+rm -f /var/lock/usm* 2>/dev/null
+rm -rf $TMPDIR 2>/dev/null
     
 ## Remove last package in cached files from function system_deps()
 ## in the case that Bob exited half way through process.

@@ -1,3 +1,0 @@
-# List of slackverse mirrors
-# Structure: slackware64-14.0/slackware64
-http://packages.slackverse.org/
