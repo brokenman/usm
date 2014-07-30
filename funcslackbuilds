@@ -65,7 +65,7 @@ for a in $REQAPPS; do
 done
 if [ ! -z ${MISSINGAPPS[@]} ]; then
     echo
-    bold "`gettext "The following programs were not found and are need to continue:"`"
+    bold "`gettext "The following programs were not found and are needed to continue:"`"
     printf '%s\n' -- "${MISSINGAPPS[@]}"
     cleanup
 fi
@@ -137,9 +137,18 @@ if [[ `grep -o cmake $1.SlackBuild` ]]; then
     fi
 fi
 
+## Check if SlackBuild requires python
+if [[ `grep -o setup.py $1.SlackBuild` ]]; then
+	if [[ ! `which python 2>/dev/null` ]]; then
+		echo
+		echo "`gettext "In order to continue you need to install:"`" $txtbld "`find $DBDIR -name "PACKAGES.TXT"|xargs grep "NAME:  python-[0-9].*\.t.z"|head -n1|awk '{print$NF}'`" $rst
+		cleanup
+	fi
+fi
+
 ## Build the package
 chmod +x $1.SlackBuild
 ## Check if qmake is required
 ./$1.SlackBuild
-popd >/dev/ull
+popd >/dev/null
 }
