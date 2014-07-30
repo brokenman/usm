@@ -293,7 +293,7 @@ fi
 
 ## Update the config file
 if [ $FROMUPDATEALL ]; then
-[ `grep -o $LDBVER $CONF` ] && sed -i "s/$LDBVER/$RDBVER/g" $CONF
+[[ `grep -o $LDBVER $CONF` ]] && sed -i "s/$LDBVER/$RDBVER/g" $CONF
 fi
 
 unset LEAVEMANIFEST LEAVESUPPLIMENTS LEAVEPACKAGES exc SDIR
