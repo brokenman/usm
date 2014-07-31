@@ -119,10 +119,25 @@ local file=${url##*/}
 dloadInProgress=$url
 
 ## Check if user wants to use a proxy
-if [ `grep "^PROXY=" $CONF` ]; then # FIX ME
-	xPROXY=`awk -F'=' '/^PROXY=/{print$NF}' $CONF`
-	export http_proxy=${xPROXY}/
-	echo "`gettext "Using proxy server:"`" $txtcyan " $http_proxy" $rst
+
+if [ `grep "^PROXY=" $CONF` ]; then
+	fPROXY=`awk -F'=' '/^PROXY=/{print$NF}' $CONF`
+	export xPROXY=${fPROXY##*//}
+	xPRE=`echo $fPROXY|cut -d':' -f1`
+	[ -z $xPRE ] && xPRE=http
+	export http_proxy=${xPRE}://${xPROXY}/
+	export HTTP_PROXY=${xPRE}://${xPROXY}/
+	if [ `grep "^PROXYUSER" $CONF` ]; then
+		PXYUSER=`awk -F= '/^PROXYUSER/{print$NF}' $CONF`
+		export http_proxy=${xPRE}://${PXYUSER}@${xPROXY}/
+		export HTTP_PROXY=${xPRE}://${PXYUSER}@${xPROXY}/
+	fi
+	if [ `grep "^PROXYPASS" $CONF` ]; then
+		PXYPASS=`awk -F= '/^PROXYPASS/{print$NF}' $CONF`
+		export http_proxy=${xPRE}://${PXYUSER}:${PXYPASS}@${xPROXY}/
+		export HTTP_PROXY=${xPRE}://${PXYUSER}:${PXYPASS}@${xPROXY}/
+	fi
+	echo "`gettext "Using proxy server:"`" $txtcyan " $xPROXY" $rst
 fi
 
 if [ "$DLOADER" = "curl" ]; then
