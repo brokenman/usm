@@ -6,9 +6,27 @@
 ## Update all database files
 update_all(){
 FROMUPDATEALL=0
+
+## Only update if a manual update wasn't already done today
+NOWTIME=`date +%s`
 for a in alien salix slacky ponce slackware slackwarepatches sbo; do
-	update_database $a
+	if [ "$a" != "sbo" ]; then
+		THENTIME=`stat -c %X $DBDIR/$a/OPTIFEST 2>/dev/null`
+		if [ $(( NOWTIME - THENTIME )) -lt  86400 ]; then
+			echo -e "$a was already updated today. Skipping."
+			continue
+		else
+			update_database $a
+		fi
+	fi
 done
+
+## Update the extra-deps file
+echo
+download $UPDLINK/configs/extra-deps.txt /tmp
+mv /tmp/extra-deps.txt $CONFDIR
+
+## Report close window
 [ $GUI ] && green "`gettext "You can now close this window"`"
 }; export -f update_all
 
@@ -26,11 +44,6 @@ if [ ! -e $TMPDIR/isonline ]; then
 	## Only download vercheck file if it does not exist
 	[ $? -eq 1 ] && { gtk_message1 "`gettext "The server could not be reached. Please try later."`"; return; } || \
 	download $UPDLINK/configs/vercheck.txt $TMPDIR && touch $TMPDIR/isonline
-fi
-
-## Get latest extra-deps file
-if [ ! -e $CONFDIR/extra-deps.txt ]; then
-	download $UPDLINK/configs/extra-deps.txt $CONFDIR
 fi
 
 RDBVER=`awk -F= '/DBVER/{print$NF}' $TMPDIR/vercheck.txt`
@@ -241,6 +254,9 @@ fi
 if [ -e $SDIR/OPTIFEST.gz ]; then
 gunzip $SDIR/OPTIFEST.gz || \
 fatality "`basename $0` $FUNCNAME $LINENO" "`gettext "Could not decompress:"`" "OPTIFEST.gz"
+## Update timestamp on OPTIFEST so we can skip this repo when doing
+## -u all if it has already been updated today.
+touch $SDIR/OPTIFEST
 fi
 
 if [ -z $LEAVEMANIFEST ]; then
@@ -291,16 +307,17 @@ if [ `egrep -ow "alien|salix|slackware" <<<$1` ]; then
 fi
 fi
 
-## Update the config file
-if [ $FROMUPDATEALL ]; then
-[[ `grep -o $LDBVER $CONF` ]] && sed -i "s/$LDBVER/$RDBVER/g" $CONF
-fi
-
 unset LEAVEMANIFEST LEAVESUPPLIMENTS LEAVEPACKAGES exc SDIR
 [ $CLI ] && bold "$1" "`gettext " database updated."`"
 [ $GUI ] && { echo "$1" "`gettext " database updated."`" > $TMPDIR/.message; sleep 1; rm $TMPDIR/.progress 2>/dev/null; sleep 0.4; }
 [ $GUI ] && [ -z $FROMUPDATEALL ] && echo && green "`gettext "You can now close this window"`"
 echo
+
+## Update the config file
+if [ $FROMUPDATEALL ]; then
+	echo "Updating config file" && echo
+	[[ `grep -o $LDBVER $CONF` ]] && sed -i "s/$LDBVER/$RDBVER/g" $CONF
+fi
 }; export -f update_database
 
 ## ======================================================================
