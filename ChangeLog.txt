@@ -1,3 +1,54 @@
++-------------------------
+Thu Aug 08 01:39:17 UTC 2014
+Fixed bug when package name is doubled (Thanks Tome)
+
++-------------------------
+Thu Jul 31 18:05:13 UTC 2014
+Added some checks to sbo build
+Fixed warning message on update
+Added skip update if updated less than 24 hours ago
+Added support for authenticated proxy (Thanks Blaze)
+
++-------------------------
+Tue Jul 29 21:12:32 UTC 2014
+Fixed merge modules name (thanks Ed_P)
+Sent edit config GUI to background (thanks Bogomips)
+Fixed system libs report malfunction (thanks Bogomips)
+Added GUI option for no prompts
+Fixed set path option (thanks Tome)
+Remove old updates before install (thanks roadie)
+
++-------------------------
+Fri May 30 17:44:26 UTC 2014
+Added auto update check (thanks fanthom)
+usm-3.1.2-noarch-1.txz: updated
+
++-------------------------
+Tue May 28 13:38:03 UTC 2014
+Added no prompts option in config file for CLI
+User may also pass 'noprompts' arg in CLI.
+Added 'show links only' option for CLI (thanks tome)
+Added option to disable GUI message about opening target
+folder after downloading packages. (thanks tome)
+
++-------------------------
+Tue May 27 23:39:22 UTC 2014
+Fixed missing kde packages
+Fixed bug when all packages are deselected (thanks tome)
+Added -L switch to find (thanks tome)
+Added message to restart after updating USM (thanks freestyler)
+
++-------------------------
+Sat Apr 12 18:20:24 UTC 2014
+Fixed SBo update (Thanks Francois)
+Fixed update database version check
+Updated to usm-3.1.1-noarch-2
+
++-------------------------
+Thu Apr 10 11:50:01 UTC 2014
+Fixed bug in slackware patches database (thanks bour59)
+
++-------------------------
 Wed Jun 04 09:35:09 UTC 2014
 Moved extra-deps online. It is downloaded
 with each database update so it can be updated instantly.
