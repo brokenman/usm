@@ -102,17 +102,18 @@ fi
 
 ## Create array that holds download links
 ## ${LINKS[@]}
+set -x ### TESTING
 declare -i TSIZE=0
 
 [ "$ARCH" = "x86_64" ] && ARCHI="x86_64" || ARCHI="x86" # Make an exception for alien repo
 for pkg in ${PKGLIST[@]}; do
 	## Find the OPTIFEST file that holds the package
-	local LONG=`find -L $DBDIR -type f -name "OPTIFEST"|xargs grep -i "Package:.*$pkg"`
+	local LONG=`find -L $DBDIR -type f -name "OPTIFEST"|xargs grep -i "Package: $pkg"`
 	local DIST=`cut -d':' -f1 <<<$LONG|awk -F/ '{print $(NF-1)}'`
 	local PKGSHORT=${pkg%-*-*-*}
 	## Based on the distro get the link, package size and total download size
 	local LNKREPO=`grep -m1 -e "^\([a-z]\)" $CONFDIR/mirrors-$DIST.txt`
-	local MID=`grep -A1 "NAME:.*$pkg" $DBDIR/$DIST/PACKAGES.TXT|tail -n1|awk '{print$NF}'|sed  's ..  '`
+	local MID=`grep -A1 "NAME: $pkg" $DBDIR/$DIST/PACKAGES.TXT|tail -n1|awk '{print$NF}'|sed  's ..  '`
 
 	[ "$DIST" = "slackware" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
 	[ "$DIST" = "slackwarepatches" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
@@ -122,7 +123,7 @@ for pkg in ${PKGLIST[@]}; do
 	[ "$DIST" = "ponce" ] && { unset EXTRA; local MID="slackware${SLACKSUFFIX}-$SLACKVER/packages"; }
 	local LINK=$LNKREPO/$EXTRA/$MID/$pkg
 	LINKS+=( $LINK )
-	local HSIZE=`grep -A3 "NAME:.*$pkg" $DBDIR/$DIST/PACKAGES.TXT|grep -i "(compressed)"|awk -F: '{ gsub (" ", "", $0); print$NF}'`
+	local HSIZE=`grep -A3 "NAME:  $pkg" $DBDIR/$DIST/PACKAGES.TXT|grep -i "(compressed)"|awk -F: '{ gsub (" ", "", $0); print$NF}'`
 	declare -i CSIZE=`tr -d [:alpha:] <<<$HSIZE`
 	let TSIZE=( $TSIZE+$CSIZE )
 	DISP+=( "$pkg [$HSIZE]" )
@@ -134,6 +135,7 @@ done
 ## Were multiple packages chosen? This is for merge module dialog
 ## If only one package don't show merge dialog
 [ ${#LINKS[@]} -gt 1 ] && MULTIPKG=true || unset MULTIPKG
+set +x ### TESTING
 
 ## Give a final report
 TXTREPLINE1="`gettext "The following packages are required."`"
@@ -411,7 +413,7 @@ until [ ${#PKGQ[@]} -eq 0 ]; do
 				## If mother package exists in ${PKGLIST[@]} (user already chose) then skip it
 				if [ ${#PKGLIST[@]} -ne 0 ]; then
 					for HAVEIT in $MOTHERPKG; do
-						if [ `echo ${PKGLIST[@]}|grep -o $HAVEIT` ]; then
+						if [[ `echo ${PKGLIST[@]}|grep -o $HAVEIT` ]]; then
 							continue 2
 						fi
 					done
@@ -516,7 +518,7 @@ function package_get_link(){
 declare -i TSIZE=0
 for pkg in $1; do
     ## Find the OPTIFEST file/s that holds the package
-    local LONG=`find -L $DBDIR -type f -name "OPTIFEST"|xargs grep -i "Package:.*$pkg"|head -n1`
+    local LONG=`find -L $DBDIR -type f -name "OPTIFEST"|xargs grep -i "Package: $pkg"|head -n1`
     local DIST=`cut -d':' -f1 <<<$LONG|awk -F/ '{print $(NF-1)}'`
     local PKGSHORT=${pkg%-*-*-*}
     
@@ -529,11 +531,11 @@ for pkg in $1; do
     [ "$DIST" = "alien" ] && local EXTRA=$SLACKVER/$ARCHI
     [ "$DIST" = "salix" ] && local EXTRA=$ARCH/$SLACKVER/salix
     [ "$DIST" = "ponce" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
-    local MID=`grep -A1 "NAME:.*$pkg" $DBDIR/$DIST/PACKAGES.TXT|tail -n1|awk '{print$NF}'|sed  's ..  '`
+    local MID=`grep -A1 "NAME:  $pkg" $DBDIR/$DIST/PACKAGES.TXT|tail -n1|awk '{print$NF}'|sed  's ..  '`
     [ "$DIST" = "ponce" ] && local MID=packages
     local LINK=$LNKREPO/$EXTRA/$MID/$pkg
     LINKS+=( $LINK )
-    local HSIZE=`grep -A3 "NAME:.*$pkg" $DBDIR/$DIST/PACKAGES.TXT|grep "(comp"|awk -F: '{ gsub (" ", "", $0); print$NF}'`
+    local HSIZE=`grep -A3 "NAME:  $pkg" $DBDIR/$DIST/PACKAGES.TXT|grep "(comp"|awk -F: '{ gsub (" ", "", $0); print$NF}'`
     declare -i CSIZE=`tr -d [:alpha:] <<<$HSIZE`
     convert_size $CSIZE # Returns $OSIZE as MB or KB depending on value given in CSIZE
     DISP+=( "$pkg [$OSIZE]" )
