@@ -112,7 +112,7 @@ for pkg in ${PKGLIST[@]}; do
 	local PKGSHORT=${pkg%-*-*-*}
 	## Based on the distro get the link, package size and total download size
 	local LNKREPO=`grep -m1 -e "^\([a-z]\)" $CONFDIR/mirrors-$DIST.txt`
-	local MID=`grep -A1 "NAME: $pkg" $DBDIR/$DIST/PACKAGES.TXT|tail -n1|awk '{print$NF}'|sed  's ..  '`
+	local MID=`grep -A1 "NAME:  $pkg" $DBDIR/$DIST/PACKAGES.TXT|tail -n1|awk '{print$NF}'|sed  's ..  '`
 
 	[ "$DIST" = "slackware" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
 	[ "$DIST" = "slackwarepatches" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
@@ -443,7 +443,7 @@ until [ ${#PKGQ[@]} -eq 0 ]; do
 						MSHORT=${MOTHERPKG%-*-*-*}
 						local SIZELONG=`find -L $DBDIR -name PACKAGES.TXT|xargs grep -A5 $b|awk "/\(compressed/"`
 						## This next line is needed because slackers PACKAGES.TXT are very different from others
-						[ `wc -c <<<$SIZELONG` -lt 3 ] && local SIZELONG=`find -L $DBDIR -name PACKAGES.TXT|xargs grep -A5 "PACKAGE NAME:.*$MSHORT$"|awk "/\(compressed/"`
+						[ `wc -c <<<$SIZELONG` -lt 3 ] && local SIZELONG=`find -L $DBDIR -name PACKAGES.TXT|xargs grep -A5 "PACKAGE NAME:  $MSHORT$"|awk "/\(compressed/"`
 						local PKGSIZE=`echo ${SIZELONG##*:}|sed 's/ //g'`
 						local PKGDIST=`echo ${SIZELONG%-*}|awk -F/ '{print $(NF-1)}'`
 						## Put values into array just so we can give nice columned output (damn column)
