@@ -102,7 +102,6 @@ fi
 
 ## Create array that holds download links
 ## ${LINKS[@]}
-set -x ### TESTING
 declare -i TSIZE=0
 
 [ "$ARCH" = "x86_64" ] && ARCHI="x86_64" || ARCHI="x86" # Make an exception for alien repo
@@ -135,7 +134,6 @@ done
 ## Were multiple packages chosen? This is for merge module dialog
 ## If only one package don't show merge dialog
 [ ${#LINKS[@]} -gt 1 ] && MULTIPKG=true || unset MULTIPKG
-set +x ### TESTING
 
 ## Give a final report
 TXTREPLINE1="`gettext "The following packages are required."`"
