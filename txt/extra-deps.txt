@@ -18,6 +18,9 @@ python,pygobject,pygtk,pycairo
 #  docutils
 python
 
+#  ekiga
+openldap-client
+
 #  frozen-bubble
 SDL_perl,perl-locale-gettext
 
@@ -71,6 +74,9 @@ python,gst-python,pycairo,pygobject,pygtk
 
 #  openjre
 rhino
+
+#  pitivi
+python,gst-python,pygtk,pycairo,pygobject
 
 #  pygtk
 pycairo,pygobject
