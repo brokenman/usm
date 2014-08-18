@@ -18,6 +18,8 @@ for a in alien salix slacky ponce slackware slackwarepatches sbo; do
 		else
 			update_database $a
 		fi
+	else
+		update_database $a
 	fi
 done
 
