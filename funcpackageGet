@@ -67,8 +67,8 @@ if [ -z $NODEPS ]; then
 		## Add the original choice to the package list for download
 		PKGLIST+=($CHOICE)
 	fi
-	## Add extra deps
 	local ORIGSHORT=${ORIGINAL%-*-*-*}
+	## Add extra deps
 	## Look in extra-deps for required packages to add to $PKGLIST
 	EDEPS=`grep -A1 "^#.* $ORIGSHORT" $CONFDIR/extra-deps.txt|tail -n1`
 	if [ "$EDEPS" ]; then
@@ -385,10 +385,21 @@ until [ ${#PKGQ[@]} -eq 0 ]; do
 	HASDEPS=`grep -A1 "$PKG" $TARGLIB|tail -n1|grep -v ".*\.t.z"`
 	if [[ ! -z $HASDEPS ]]; then
 		ALLDEPS=`sed 's@,@@g' <<<$HASDEPS`
+
+		## Remove any ignored deps from /etc/usm/ignored-deps.txt
+		iPKGSHORT=${PKG%-*-*-*}
+		IGDEPS=`grep -A1 "^#.* $iPKGSHORT" $CONFDIR/ignore-deps.txt|tail -n1`
+		echo "Ignored libraries: $IGDEPS"
+		if [ "$IGDEPS" ]; then
+			for ignoreit in `echo $IGDEPS|tr ',' '\n'`; do
+				ALLDEPS2=`echo $ALLDEPS|tr ' ' '\n'|grep -v $ignoreit`
+				ALLDEPS=$ALLDEPS2 && unset ALLDEPS2
+			done
+		fi
 		LIBCNT=`wc -w <<<$ALLDEPS`
 		declare -i RESCNT=0
 		[ $CLI ] && { echo; echo "`gettext "Libraries required: "`" "$LIBCNT"; }
-		
+				
 		## Remove the system libs from the required library list (ALLDEPS)
 		for a in $ALLDEPS; do
 			if [[ `grep $a $LOCALDB/libs.txt` ]]; then
@@ -396,6 +407,7 @@ until [ ${#PKGQ[@]} -eq 0 ]; do
 				(( RESCNT++ ))
 			fi
 		done
+		
 		[ $CLI ] && echo "`gettext "Libraries found in system:"`" "$RESCNT"
 		[ $CLI ] && { echo "`gettext "Libraries to resolve:"`" "`wc -w <<<$ALLDEPS`"; echo; }
 
