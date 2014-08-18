@@ -20,7 +20,13 @@ for a in alien salix slacky ponce slackware slackwarepatches sbo; do
 			update_database $a
 		fi
 	else
-		update_database $a
+		THENTIME=`stat-c %X $DBDIR/$a/SLACKBUILDS.TXT 2>/dev/null`
+		if [ $(( NOWTIME - THENTIME )) -lt $TLIMIT ]; then
+			echo -e "$a was already updated today. Skipping."
+			continue
+		else
+			update_database $a
+		fi
 	fi
 done
 
