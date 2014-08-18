@@ -9,10 +9,11 @@ FROMUPDATEALL=0
 
 ## Only update if a manual update wasn't already done today
 NOWTIME=`date +%s`
+TLIMIT=`awk -F= '/SKIPDB/{print$NF}' $CONF`
 for a in alien salix slacky ponce slackware slackwarepatches sbo; do
 	if [ "$a" != "sbo" ]; then
 		THENTIME=`stat -c %X $DBDIR/$a/OPTIFEST 2>/dev/null`
-		if [ $(( NOWTIME - THENTIME )) -lt  86400 ]; then
+		if [ $(( NOWTIME - THENTIME )) -lt  $TLIMIT ]; then
 			echo -e "$a was already updated today. Skipping."
 			continue
 		else
