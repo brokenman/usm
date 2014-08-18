@@ -20,8 +20,9 @@ for a in alien salix slacky ponce slackware slackwarepatches sbo; do
 			update_database $a
 		fi
 	else
-		THENTIME=`stat-c %X $DBDIR/$a/SLACKBUILDS.TXT 2>/dev/null`
+		THENTIME=`stat -c %X $DBDIR/$a/SLACKBUILDS.TXT 2>/dev/null`
 		if [ $(( NOWTIME - THENTIME )) -lt $TLIMIT ]; then
+			SKIPPED=1
 			echo -e "$a was already updated today. Skipping."
 			continue
 		else
@@ -32,8 +33,20 @@ done
 
 ## Update the extra-deps file
 echo
-download $UPDLINK/configs/extra-deps.txt /tmp
-mv /tmp/extra-deps.txt $CONFDIR
+if [ -e $CONFDIR/extra-deps.txt ]; then
+	THENTIME=`stat -c %X $CONFDIR/extra-deps.txt 2>/dev/null`
+	if [ $(( NOWTIME - THENTIME )) -lt $TLIMIT ]; then
+		echo -e "$a was already updated $(( NOWTIME - THENTIME)) ago. Skipping."
+		SKIPPED=1
+	else
+		download $UPDLINK/configs/extra-deps.txt /tmp
+		mv /tmp/extra-deps.txt $CONFDIR
+		touch $CONFDIR/extra-deps.txt
+	fi
+fi
+[ $SKIPPED ] && echo "You can change the time limit for skipping in: $CONF" && \
+echo "The default is 3 hours"
+unset SKIPPED THENTIME NOWTIME TLIMIT
 
 ## Report close window
 [ $GUI ] && green "`gettext "You can now close this window"`"
@@ -99,7 +112,7 @@ case $1 in
 			download $UPDLINK/db/alien/$ARCH/$a $SDIR
 		else
 			echo "$a" > $TMPDIR/.message
-			wget $WFLAGS -o $TMPDIR/.progress $UPDLINK/db/alien/$ARCH/$a -P $SDIR	
+			wget $WFLAGS -o $TMPDIR/.progress $UPDLINK/db/alien/$ARCH/$a -P $SDIR
 			sleep 0.4
 		fi	
 	done
@@ -112,7 +125,7 @@ case $1 in
 			download $REPO_SALIX/$ARCH/$SLACKVER/$a $SDIR
 		else
 			echo "$a" > $TMPDIR/.message
-			wget $WFLAGS -o $TMPDIR/.progress $REPO_SALIX/$ARCH/$SLACKVER/$a -P $SDIR	
+			wget $WFLAGS -o $TMPDIR/.progress $REPO_SALIX/$ARCH/$SLACKVER/$a -P $SDIR
 			sleep 0.4
 		fi
 	done
@@ -251,6 +264,7 @@ fi
 if [ -e $SDIR/SLACKBUILDS.TXT.gz ]; then
 gunzip $SDIR/SLACKBUILDS.TXT.gz || \
 fatality "`basename $0` $FUNCNAME $LINENO" "`gettext "Could not decompress:"`" "SLACKBUILDS.TXT.gz"
+touch $SDIR/SLACKBUILDS.TXT
 fi
 
 ## If there is a gzipped LIBS.TXT file then decompress
