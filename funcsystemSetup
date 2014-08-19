@@ -72,7 +72,7 @@ fi
 
 ## Check for graphical file manager
 if [ $GUI ]; then
-	FMANAGER=="dolphin konqueror krusader thunar nautilus caja spacefm krusader pcmanfm xfe rox"
+	FMANAGER="dolphin konqueror krusader thunar Thunar nautilus caja spacefm krusader pcmanfm xfe rox"
 	for a in $FMANAGER; do
 		command -v $a >/dev/null && { export FILEMANAGER=`command -v $a`; break; }
 	done
