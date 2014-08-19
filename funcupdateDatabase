@@ -14,7 +14,8 @@ for a in alien salix slacky ponce slackware slackwarepatches sbo; do
 	if [ "$a" != "sbo" ]; then
 		THENTIME=`stat -c %X $DBDIR/$a/OPTIFEST 2>/dev/null`
 		if [ $(( NOWTIME - THENTIME )) -lt  $TLIMIT ]; then
-			echo -e "$a was already updated today. Skipping."
+			TIMESINCE=$(( NOWTIME - THENTIME ))
+			echo -e "$a was updated $TIMESINCE seconds ago. Skipping."
 			continue
 		else
 			update_database $a
@@ -22,8 +23,9 @@ for a in alien salix slacky ponce slackware slackwarepatches sbo; do
 	else
 		THENTIME=`stat -c %X $DBDIR/$a/SLACKBUILDS.TXT 2>/dev/null`
 		if [ $(( NOWTIME - THENTIME )) -lt $TLIMIT ]; then
+			TIMESINCE=$(( NOWTIME - THENTIME ))
 			SKIPPED=1
-			echo -e "$a was already updated today. Skipping."
+			echo -e "$a was updated $TIMESINCE seconds ago. Skipping."
 			continue
 		else
 			update_database $a
@@ -31,22 +33,33 @@ for a in alien salix slacky ponce slackware slackwarepatches sbo; do
 	fi
 done
 
-## Update the extra-deps file
+## Update the extra-deps and ignore-deps
 echo
-if [ -e $CONFDIR/extra-deps.txt ]; then
-	THENTIME=`stat -c %X $CONFDIR/extra-deps.txt 2>/dev/null`
+for updateme in $CONFDIR/extra-deps.txt $CONFDIR/ignore-deps.txt; do
+PFILE=${updateme##*/}
+if [ -f $updateme ]; then
+	THENTIME=`stat -c %X $updateme 2>/dev/null`
+	TIMESINCE=$(( NOWTIME - THENTIME ))
 	if [ $(( NOWTIME - THENTIME )) -lt $TLIMIT ]; then
-		echo -e "$a was already updated $(( NOWTIME - THENTIME)) ago. Skipping."
+		echo -e "$PFILE was updated $TIMESINCE seconds ago. Skipping."
 		SKIPPED=1
 	else
-		download $UPDLINK/configs/extra-deps.txt /tmp
-		mv /tmp/extra-deps.txt $CONFDIR
-		touch $CONFDIR/extra-deps.txt
+		download $UPDLINK/configs/$PFILE /tmp
+		cp /tmp/$PFILE $CONFDIR
+		touch $CONFDIR/$PFILE.txt
 	fi
+else
+		## If the extra-deps.txt file does not exist (bug in older version)
+		## then download it now.
+		download $UPDLINK/configs/$PFILE /tmp
+		cp /tmp/$PFILE $CONFDIR
+		touch $CONFDIR/$PFILE.txt	
 fi
+done
+echo
 [ $SKIPPED ] && echo "You can change the time limit for skipping in: $CONF" && \
 echo "The default is 3 hours"
-unset SKIPPED THENTIME NOWTIME TLIMIT
+unset SKIPPED THENTIME NOWTIME TLIMIT PFILE
 
 ## Report close window
 [ $GUI ] && green "`gettext "You can now close this window"`"
