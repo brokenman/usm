@@ -45,15 +45,15 @@ if [ -f $updateme ]; then
 		SKIPPED=1
 	else
 		download $UPDLINK/configs/$PFILE /tmp
-		cp /tmp/$PFILE $CONFDIR
-		touch $CONFDIR/$PFILE.txt
+		mv /tmp/$PFILE $CONFDIR
+		touch $CONFDIR/$PFILE
 	fi
 else
 		## If the extra-deps.txt file does not exist (bug in older version)
 		## then download it now.
 		download $UPDLINK/configs/$PFILE /tmp
 		cp /tmp/$PFILE $CONFDIR
-		touch $CONFDIR/$PFILE.txt	
+		touch $CONFDIR/$PFILE	
 fi
 done
 echo
