@@ -169,8 +169,7 @@ shift
 help_give "`gettext "usm -u <distro>"`" "`gettext "For example: usm -u slackware"`"
 ## Remove version check file if exists
 [ -e $TMPDIR/vercheck.txt ] && rm $TMPDIR/vercheck.txt
-## Remove the extra deps file so a new one is downloaded
-[ -e $CONFDIR/extra-deps.txt ] && rm $CONFDIR/extra-deps.txt
+
 [ "$1" == "sbo" ] && { update_database sbo; cleanup; }
 [ "$1" == "slackware" ] && { update_database slackware; cleanup; }
 [ "$1" == "slackwarepatches" ] && { update_database slackwarepatches; cleanup; }
