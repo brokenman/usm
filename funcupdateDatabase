@@ -351,8 +351,13 @@ echo
 
 ## Update the config file
 if [ $FROMUPDATEALL ]; then
+    NOWTIME=`date +%s`
+    TLIMIT=`awk -F= '/SKIPDB/{print$NF}' $CONF`
+    THENTIME=`stat -c %X $CONF 2>/dev/null`
+    if [ $(( NOWTIME - THENTIME )) -gt $TLIMIT ]; then
 	echo "Updating config file" && echo
 	[[ `grep -o $LDBVER $CONF` ]] && sed -i "s/$LDBVER/$RDBVER/g" $CONF
+    fi
 fi
 }; export -f update_database
 
