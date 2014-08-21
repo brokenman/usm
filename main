@@ -570,6 +570,21 @@ export USM_MAIN='
 				<action function="fileselect">entselDirStorage</action>
 			</button>
 		</hbox>
+		<hbox>
+			<text  space-expand="false" space-fill="false" xalign="0" width-request="200"><label>'$(gettext "Database folder: ")'</label></text>
+			<entry fs-action="folder" fs-title="'$(gettext "Select a folder")'"
+			editable="false" space-expand="true" space-fill="true"
+			tooltip-text="'$(gettext "The location where the slackware databases will be stored.")'">
+				<variable>entselDirDb</variable>
+				<default>'$DBDIR'</default>
+				<action signal="changed">sed -i 's^DBDIR='$DBDIR'^DBDIR='$entselDirDb'^g' $CONF</action>
+			</entry>
+			<button space-expand="false" space-fill="false">
+				<label>Select</label>
+				<variable>butselDirDb</variable>
+				<action function="fileselect">entselDirDb</action>
+			</button>
+		</hbox>
 		
 		<hbox>
 			<text  space-expand="false" space-fill="false" xalign="0" width-request="200"><label>'$(gettext "Slackbuilds: ")'</label></text>
