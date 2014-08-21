@@ -1,4 +1,17 @@
 +-------------------------
+Thu Aug 21 23:03:45 UTC 2014
+Fixed module question showing in slackware (thanks Slaxmax)
+Fixed deselect option not working in CLI (thanks Slaxmax)
+Added database dir to preferences in GUI
+Fixed extra-deps being removed in global update (thanks Bogomips)
+Removed multiple updates of config file during global update
+Add ignored-deps.txt functionality for deps that are not required
+Change default time from 24 hours to 3 hours for skipping updates (thanks Ed_P)
+Fixed sbo not updating in global update (thanks cttan)
+Added openldap-client missing dep for ekiga (thanks cttan)
+Fixed dolphin not opening storage folder (thanks router) 
+
++-------------------------
 Thu Aug 08 01:39:17 UTC 2014
 Fixed bug when package name is doubled (Thanks Tome)
 
