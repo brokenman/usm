@@ -75,9 +75,11 @@ clear
 done
 
 msg=" nothing"
-for i in ${!required[@]}; do 
-    [[ "${choices[i]}" ]] && { FINALPKGS="${FINALPKGS} ${required[i]}"; msg=""; }
+for i in ${!required[@]}; do
+    #[[ "${choices[i]}" = "+" ]] && { FINALPKGS="${FINALPKGS} ${required[i]}"; msg=""; }
+    [[ "${choices[i]}" = "+" ]] && NEWFINAL+=( `echo $FINALPKGS|tr ' ' '\n'|grep ${required[i]}` )
 done
+FINALPKGS=${NEWFINAL[@]} && unset NEWFINAL
 echo
 }
 
@@ -102,8 +104,10 @@ done
 
 msg=" nothing"
 for i in ${!required[@]}; do 
-    [[ "${choices[i]}" ]] && { FINALPKGS="${FINALPKGS} ${required[i]}"; msg=""; }
+    #[[ "${choices[i]}" ]] && { FINALPKGS="${FINALPKGS} ${required[i]}"; msg=""; }
+    [[ "${choices[i]}" = "+" ]] && NEWFINAL+=( `echo $FINALPKGS|tr ' ' '\n'|grep ${required[i]}` )
 done
+FINALPKGS=${NEWFINAL[@]} && unset NEWFINAL
 echo
 }
 
