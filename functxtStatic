@@ -24,7 +24,7 @@ echo
 echo -e "`gettext " set: Set local storage. \t /path/to/folder"`"
 echo -e "`gettext " linksonly: Only show links."`"
 echo -e "`gettext " noprompts: Only essential questions."`"
-echo -e "`gettext " nodeps: No dpepndency resolution."`"
+echo -e "`gettext " nodeps: No dependency resolution."`"
 echo
 echo $txtbld "`gettext "Slackbuilds options"`" $rst
 echo -e "`gettext "  sbo -l: list sbo categories"`"
