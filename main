@@ -217,6 +217,7 @@ if [ -z $2 ]; then
 	echo "`gettext "Slackware"`" "$SLACKVER"
 	echo "`gettext "Current kernel"`" `uname -r`
 	echo "`gettext "Current distros:"`" "$DISTROS"
+	cat /proc/cmdline
 	help_give "`gettext "usm -i <package>"`" "`gettext "For example: usm -i imagemagick"`"
 		elif [ `egrep "^\-h$|^\-help$|^\--help$|^help$|^\?$" <<<$2` ]; then
 	help_give "`gettext "usm -i <package>"`" "`gettext "For example: usm -i imagemagick"`"
