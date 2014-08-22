@@ -197,13 +197,25 @@ cleanup
 ###################################### INFO
 -i|-info|--info|info ) 
 if [ -z $2 ]; then
+	## Get platform
+	if [ -e /etc/porteus-version ] && [ /etc/slackware-version ]; then
+		PLATFORM=`cat /etc/porteus-version`
+			elif [ /etc/slackware-version ] && [ ! /etc/porteus-version ]; then
+		PLATFORM=`cat /etc/slackware-version`
+			else
+		PLATFORM=UNKNOWN
+	fi
 	echo "`gettext "++++++++++++++++++++++++++++++"`"
 	echo "`gettext "usm application information"`"
 	echo
 	echo "`gettext "USM version: "`" "$USMVERSION"
+	echo "`gettext "DB version: "`" `awk -F= '/DBVER/{print$NF}' $CONF`
 	echo "`gettext "Current storage:"`" "$STORAGE"
+	echo "`gettext "Current config:"`" "$CONF"
+	echo "`gettext "Current platform:"`" "$PLATFORM"
 	echo "`gettext "Current arch:"`" "$ARCH"
 	echo "`gettext "Slackware"`" "$SLACKVER"
+	echo "`gettext "Current kernel"`" `uname -r`
 	echo "`gettext "Current distros:"`" "$DISTROS"
 	help_give "`gettext "usm -i <package>"`" "`gettext "For example: usm -i imagemagick"`"
 		elif [ `egrep "^\-h$|^\-help$|^\--help$|^help$|^\?$" <<<$2` ]; then
