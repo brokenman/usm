@@ -45,8 +45,11 @@ python,pycairo,pygobject,pygtk,dbus-python,PyQt,sip,ghostscript,net-snmp,notify-
 #  icedtea-web
 openjre
 
-# ImageJ
+#  ImageJ
 openjre
+
+#  imagemagick
+lcms2
 
 #  k3b
 cdrdao
