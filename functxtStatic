@@ -19,6 +19,7 @@ echo -e "`gettext "  -d: Resolve dependencies. \t </var/log/packages/package-nam
 echo -e "`gettext "  -c: Open repo changelog. \t <distro>"`"
 echo -e "`gettext "  -k: Keyword search. \t\t <string>"`"
 echo -e "`gettext "  -b: Build from source. \t <package>"`"
+echo -e "`gettext "  -v: Get USM version."`"
 echo -e "`gettext "  -h: Show this help."`"
 echo
 echo -e "`gettext " set: Set local storage. \t /path/to/folder"`"
@@ -38,6 +39,8 @@ echo
 
 ## TRANSLATORS: Do not translate 'man usm'
 echo "`gettext "Type:"`" $txtbld "man usm" $rst "`gettext "for more info"`"
+echo
+echo $txtbld "`gettext "You are using USM version:"`" $rst  "$USMVERSION"
 cleanup
 }
 
