@@ -1,52 +1,37 @@
 #!/bin/bash
 
-## =====================================================================
-## system_deps
-## ---------------------------------------------------------------------
-## Resolve dependencies for entire system
 function system_deps(){
-## Set a tag so cleanup knows we came from this function
 SDEPS=1
 
-## Create required dirs
 [ ! -d $CACHEPATH ] && mkdir -p $CACHEPATH
 
-## Get timestamp of cached files. They will be dumped if older
-## than hours set  in variables section
 let SECS=( 3600 * $HOURS )
 [ -e $CACHE ] && local CACHETIME=`stat -c %Y $CACHE`
 [ -e $CHECKED ] && local REPTIME=`stat -c %Y $CHECKED`
 local TIMENOW=`date +%s`
 [ -e $CACHE ] && [ $(( $TIMENOW - $CACHETIME )) -gt $SECS ] && rm $CACHE $CHECKED
 
-## Update timestamp of 'packages checked' cache
 touch $CHECKED
 
-## These are the includes and excludes when searching for executables and libs
 local INCLUDES="lib/.*|lib64/.*|bin/.*"
 local EXCLUDES=".*/$|/locale/|/i18n/|zoneinfo|/kernel/|/rules\.d/|/include/|html|doc/|firmware|/man/|/template.*|.*\.h$|.*\.py$|.*\.la$|.*\.xml$|.*\.png$"
 
 for PACKAGE in /var/log/packages/*; do
     local SH=${PACKAGE##*/}
-    ## Quick check for valid slackware package
     [ `awk -F- '{print NF}' <<<$SH` -lt 4 ] && NOTSLACK=1
     [ ! `grep -o "NAME:" <$PACKAGE` ] && NOTSLACK=1
     [ $NOTSLACK ] && { echo "$SH" $txtpink "`gettext "is not a valid file"`" $rst "skipping"; unset NOTSLACK; continue; }
-    ## Add package to cache so future processing is faster
     grep -oq $SH $CHECKED && { echo "`gettext "Checked:"`" "$SH"; continue; } || echo "`gettext "Processing:"`" "$SH"|tee -a $CHECKED
-    ## Search packages file for executables and libs
     for b in `egrep "lib/.*|lib64/.*|bin/.*" $PACKAGE|egrep -v "$EXCLUDES"|sed '/.*/s/^/\//'`; do
         if [ -x $b ]; then
             NOTFOUND=`ldd $b 2>/dev/null|grep "not found"`
             if [ "$NOTFOUND" ]; then
-            ## Remove file if it is in system files already
                 for x in `awk '{print$1}' <<<"$NOTFOUND"`; do
                     if [[ `grep $x $DBDIR/local/libs.txt` ]]; then 
                         NOTFOUND=`echo -e "\n$NOTFOUND"|sed -e 's/^[ \t]*//' -e '/'$x'/d' -e '/^$/d'`
                     fi
                 done
             fi
-            ## If NOTFOUND still has stuff in it then send to cache report file
             if [ `wc -c <<<"$NOTFOUND"` -gt 3 ]; then 
                 echo -e "\n$NOTFOUND"|sed 's/^[ \t]*//' >> $CACHE
                 echo "`gettext "Required by:"`" "${PACKAGE##*/} ($b)" >> $CACHE
@@ -55,14 +40,12 @@ for PACKAGE in /var/log/packages/*; do
     done
 done
 
-## Give report
 echo "####################################"
 cat $CACHE
 echo
 echo "####################################"
 echo
 
-## If dependencies are missing give a count
 if [ -e $CACHE ]; then
     local MDEPCNT=`grep "not found" $CACHE|sort -u|wc -l`
     echo
@@ -71,49 +54,37 @@ else
     echo "`gettext "Missing dependencies: 0"`" && cleanup end
 fi
 
-## Check database files
 if [ $MISSINGDB ]; then
 	echo $txtbld "$DATABASEERROR2" $rst
 	echo "`gettext " Please run: usm -u all"`"
 	cleanup
 fi
 
-## If dependencies are found then search for mother package.
 for a in `grep "\=>" $CACHE|sort -u|awk '{print$1}'`; do
     unset DPKG RESULT CHOICE
     local FPKG=`find -L $DBDIR -name OPTIFEST|xargs grep $a|sort -u`
     if [ "$FPKG" ]; then
         echo "`gettext "Searching"`" $txtbld "$a:" $rst "`gettext "found"`" "`wc -w <<<$FPKG`" "`gettext "packages."`"
-        ## Find the mother package
         for DIST in `echo $FPKG|tr " " "\n"|awk -F/ '{print $(NF-1)}'`; do
             DPKG+=( `tac $DBDIR/$DIST/OPTIFEST|sed -n '/'$a'/,/Package:/p'|tail -n1|awk '{print$NF}'` )
         done
-        ## If the package already exists in ${PKGLIST{@}} array then skip it.
         for CH in ${DPKG[@]}; do
             if [[ `grep $CH <<<${PKGLIST[@]}` ]]; then
                 echo "`gettext "Package already in download list."`" && echo
                 continue 2
             fi
         done
-        ## Give Bob the option to download a package or skip it
         RESULT="${DPKG[@]} None"
         system_deps_download_choice $RESULT
-        ## Add chosen package to array so we can skip future libraries
-        ## if they exist in an already chosen package.
         [ "$CHOICE" != "None" ] && PKGLIST+=( $CHOICE ) || continue
         package_get_link $CHOICE
     else
-        ## No packages were found for this library
         echo "`gettext "Searching"`" $txtbld "$a:" $rst "`gettext "found"`" "0" "`gettext "packages."`"
     fi
 done
 system_deps_download
 }
 
-## =====================================================================
-## system_deps_download
-## ---------------------------------------------------------------------
-## Download missing system dependencies
 function system_deps_download(){
 echo
 echo $txtbld "`gettext "The following packages are ready to download:"`" $rst
@@ -127,22 +98,19 @@ if [ $CLI ]; then
 	[[ $REPLY =~ ^[Qq]$ ]] && cleanup
 	if [[ $REPLY =~ ^[Rr]$ ]]; then 
 		for a in ${LINKS[@]}; do shlink=${a##*/}; tLINKS+=( $shlink ); done
+		fromsystemDeps=0
 		if [ ${#tLINKS[@]} -lt 10 ];then
-			## menu_deselect returns the variable $FINALPKGS
 			menu_deselect "${tLINKS[@]}"
 			unset tLINKS
 				else
 			menu_deselect_plusten "${tLINKS[@]}"
 		fi
 	else
-		## Create the FINALPKGS variable if user just chose to download
 		FINALPKGS="${PKGLIST[@]}"
 	fi
 fi
 
-## If Bob deselected some items then remove them from ${LINKS[@]}
-## If nothing is deselected the function returns "nothing"
-
+unset fromsystemDeps
 [[ -z $FINALPKGS ]] && cleanup
 
 if [ "$FINALPKGS" ]; then
@@ -151,15 +119,12 @@ if [ "$FINALPKGS" ]; then
     done
     LINKS=("${pLINKS[@]}") && unset pLINKS
         else
-    ## If we came from single dep resolution then we don't want to quit.
     if [ -z $SDEPS ]; then
-        ## User deslected everything
 		unset LINKS
 		cleanup
 	fi
 fi
 
-## Download packages
 for a in "${LINKS[@]}"; do
     DPKG=${a##*/}
     if [ ! -e $STORAGE/$DPKG ]; then
@@ -169,7 +134,6 @@ for a in "${LINKS[@]}"; do
         continue
     fi
     md5s=`md5sum < $STORAGE/$DPKG|awk '{print$1}'`
-    ## We have to scrape ALL md5sum files. Easier than recoding.
     if [[ `find -L $DBDIR -name CHECKSUMS.md5|xargs grep $md5s|awk -F/ '{print$NF}'|wc -l` -gt 0 ]]; then
         echo "`gettext "File verificaion is good"`"
     else
@@ -178,10 +142,6 @@ for a in "${LINKS[@]}"; do
 done
 }
 
-## =====================================================================
-## system_deps_download_choice
-## ---------------------------------------------------------------------
-## Download dependencies for entire system
 function system_deps_download_choice(){
 echo "`gettext "Choose a package to download or choose 'None' to neglect"`"
 select CHOICE in $RESULT; do
@@ -195,14 +155,9 @@ unset RESULT
 echo
 }
 
-## =====================================================================
-## system_deps_single
-## ---------------------------------------------------------------------
-## Resolve dependencies for a single package
 function system_deps_single(){
 echo
 
-## Set a tag so cleanup knows we came from this function
 SDEPS=1
 
 PACKAGE=${1##*/}
@@ -214,24 +169,20 @@ else
 fi
 echo $txtbld "`gettext "Processing"`" $rst "$PACKAGE" && echo 
 
-## These are the includes and excludes when searching for executables and libs
 local INCLUDES="lib/.*|lib64/.*|bin/.*"
 local EXCLUDES=".*/$|/locale/|/i18n/|zoneinfo|/kernel/|/rules\.d/|/include/|html|doc/|firmware|/man/|/template.*|.*\.h$|.*\.py$|.*\.la$|.*\.xml$|.*\.png$"
     
 local CACHE=$TMPDIR/singlefile.dep
-## Search packages file for executables and libs
 for b in `egrep "lib/.*|lib64/.*|bin/.*" $1|egrep -v "$EXCLUDES"|sed '/.*/s/^/\//'`; do
     if [ -x $b ]; then
         NOTFOUND=`ldd $b 2>/dev/null|grep "not found"`
         if [ "$NOTFOUND" ]; then
-        ## Remove file if it is in system files already
             for x in `awk '{print$1}' <<<"$NOTFOUND"`; do
                 if [[ `grep $x $DBDIR/local/libs.txt` ]]; then 
                     NOTFOUND=`echo -e "\n$NOTFOUND"|sed -e 's/^[ \t]*//' -e '/'$x'/d' -e '/^$/d'`
                 fi
             done
         fi
-        ## If NOTFOUND still has stuff in it then send to cache report file
         if [ `wc -c <<<"$NOTFOUND"` -gt 3 ]; then 
             echo -e "\n$NOTFOUND"|sed 's/^[ \t]*//' >> $CACHE
             echo "`gettext "Required by:"`" "${PACKAGE##*/} ($b)" >> $CACHE
@@ -239,7 +190,6 @@ for b in `egrep "lib/.*|lib64/.*|bin/.*" $1|egrep -v "$EXCLUDES"|sed '/.*/s/^/\/
     fi
 done
 
-## Give report
 if [ -f $CACHE ]; then
 echo "####################################"
 cat $CACHE
@@ -248,7 +198,6 @@ echo "####################################"
 echo
 fi
 
-## If dependencies are missing give a count
 if [ -e $CACHE ]; then
     local MDEPCNT=`grep "not found" $CACHE|sort -u|wc -l`
     echo
@@ -257,54 +206,39 @@ else
     echo "`gettext "Missing dependencies: 0"`" && cleanup end
 fi
 
-## Check database files
 if [ $MISSINGDB ]; then
 	echo && echo $txtbld "$DATABASEERROR2" $rst
 	echo "`gettext " Please run: usm -u all"`"
 	cleanup
 fi
 
-## If dependencies are found then search for mother package.
 for a in `grep "\=>" $CACHE|sort -u|awk '{print$1}'`; do
     unset DPKG RESULT CHOICE
     local FPKG=`find -L $DBDIR -name OPTIFEST|xargs grep $a|sort -u`
     if [ "$FPKG" ]; then
         echo "`gettext "Searching"`" $txtbld "$a:" $rst "`gettext "found"`" "`wc -w <<<$FPKG`" "`gettext "packages."`"
-        ## Find the mother package
         for DIST in `echo $FPKG|tr " " "\n"|awk -F/ '{print $(NF-1)}'`; do
             DPKG+=( `tac $DBDIR/$DIST/OPTIFEST|sed -n '/'$a'/,/Package:/p'|tail -n1|awk '{print$NF}'` )
         done
-        ## If the package already exists in ${PKGLIST{@}} array then skip it.
         for CH in ${DPKG[@]}; do
             if [[ `grep $CH <<<${PKGLIST[@]}` ]]; then
                 echo "`gettext "Package already in download list."`" && echo
                 continue 2
             fi
         done
-        ## Give Bob the option to download a package or skip it
         RESULT="${DPKG[@]} None"
         system_deps_download_choice $RESULT
-        ## Add chosen package to array so we can skip future libraries
-        ## if they exist in an already chosen package.
         [ "$CHOICE" != "None" ] && PKGLIST+=( $CHOICE ) || continue
         package_get_link $CHOICE
     else
-        ## No packages were found for this library
         echo "`gettext "Searching"`" $txtbld "$a:" $rst "`gettext "found"`" "0" "`gettext "packages."`"
     fi
 done
 system_deps_download
 }
 
-## =====================================================================
-## system_deps_package
-## ---------------------------------------------------------------------
-## Resolve dependencies for a single uninstalled package
-## The package is initially installed to the system as it must
-## be unpacked in order to process the executables.
 system_deps_package(){
 PACKAGE=$1
-## Check if file is a slackware package or porteus module
 local ext=${PACKAGE##*.}
 if [ ! `egrep -o "xzm|txz|tgz" <<<$ext` ]; then
 	echo
@@ -312,11 +246,9 @@ if [ ! `egrep -o "xzm|txz|tgz" <<<$ext` ]; then
 	cleanup
 fi
 
-## Get the name of the package
 local PKGNAME=${PACKAGE##*/}
 local PKGNAMESHORT=${PKGNAME%.*}
 
-## If it is not installed, install it
 if [ $CLI ]; then
 	if [ ! -e /var/log/packages/$PKGNAMESHORT ]; then
 		echo
@@ -334,10 +266,8 @@ if [ $CLI ]; then
 fi
 fi
 
-## Now hand over to the resolve installed package function
 system_deps_single /var/log/packages/$PKGNAMESHORT
 
-## Remove the package if user wants
 echo "$PACKAGE" "`gettext "was isntalled."`"
 read -p "`gettext "Would you like to uninstall the package [y/n]"`" -n 1 -r -s && echo
 [[ ! $REPLY =~ ^[Yy]$ ]] && cleanup
