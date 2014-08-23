@@ -1,6 +1,5 @@
 #!/bin/bash
 
-## Color definitions for light and dark CLI backgrounds
 txtund=$(tput sgr 0 1)          # Underline
 txtbld=$(tput bold)             # Bold
 txtred=$(tput setaf 1)${txtbld} # Red
@@ -22,10 +21,6 @@ function blue(){ echo -e $txtblue "$@" $rst; }
 
 function red(){ echo -e $txtred "$@" $rst; }
 
-## ======================================================================
-## menu_multiple_choice
-## ----------------------------------------------------------------------
-## Multiple choice menu called by other functions
 function menu_multiple_choice() {
 	echo
     echo "`gettext "Avaliable options:"`"
@@ -36,12 +31,6 @@ function menu_multiple_choice() {
     [[ "$msg" ]] && echo "$msg"; :
 }
 
-## ======================================================================
-## menu_from_variable
-## ----------------------------------------------------------------------
-## Creates a cli menu from variable containing a list
-## Feed this function a variable called $RESULT
-## It returns out $CHOICE
 function menu_from_variable(){
 echo
 echo "`gettext " The following items were found."`"
@@ -56,10 +45,6 @@ select CHOICE in $RESULT; do
 done
 }
 
-## ======================================================================
-## menu_deselect
-## ----------------------------------------------------------------------
-## Creates a cli menu with all options already checked
 function menu_deselect(){
 required=( $@ )
 clear
@@ -77,17 +62,18 @@ done
 msg=" nothing"
 for i in ${!required[@]}; do
     #[[ "${choices[i]}" = "+" ]] && { FINALPKGS="${FINALPKGS} ${required[i]}"; msg=""; }
-    [[ "${choices[i]}" = "+" ]] && NEWFINAL+=( `echo $FINALPKGS|tr ' ' '\n'|grep ${required[i]}` )
+    if [ $frompackageGet ]; then
+		[[ "${choices[i]}" = "+" ]] && NEWFINAL+=( `echo $FINALPKGS|tr ' ' '\n'|grep ${required[i]}` )
+	elif [ $fromsystemDeps=0 ]; then
+		[[ "${choices[i]}" = "+" ]] && NEWFINAL+=( ${required[i]} )
+	else
+		echo "Error at $FUNCNAME $LINENO: please notify brokenman"
+	fi
 done
 FINALPKGS=${NEWFINAL[@]} && unset NEWFINAL
 echo
 }
 
-## ======================================================================
-## menu_deselect_plusten
-## ----------------------------------------------------------------------
-## Creates a cli menu with all options already checked
-## for use with more than nine items (double digits)
 function menu_deselect_plusten(){
 required=( $@ )
 clear
@@ -111,18 +97,12 @@ FINALPKGS=${NEWFINAL[@]} && unset NEWFINAL
 echo
 }
 
-## ======================================================================
-## download
-## ----------------------------------------------------------------------
-## A simple download percentage scroller
 function download() {
 local url=$1
 local file=${url##*/}
 
-## Load current download into a variable so we can remove it if user cancels mid download.
 dloadInProgress=$url
 
-## Check if user wants to use a proxy
 
 if [ `grep "^PROXY=" $CONF` ]; then
 	fPROXY=`awk -F'=' '/^PROXY=/{print$NF}' $CONF`
@@ -156,18 +136,10 @@ fi
 unset dloadInProgress
 }; export -f download
 
-## ======================================================================
-## help_check
-## ----------------------------------------------------------------------
-## Check if user passed help switch in cli
 function help_check(){
 [ `egrep "^-h$|^-help$|^--help$|^help$|\?" <<<$1` ] || [ -z $1 ] && return 0
 }
 
-## ======================================================================
-## help_give
-## ----------------------------------------------------------------------
-## Display help
 function help_give(){
 echo
 echo -e $txtbld "Use: $1" $rst
@@ -175,10 +147,6 @@ echo " $2"
 cleanup
 }
 
-## ======================================================================
-## silent_download
-## ----------------------------------------------------------------------
-## silently download a file
 silent_download(){ 
 	wget --trust-server-names $1 -q -P $2
 }; export -f silent_download
