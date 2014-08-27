@@ -309,6 +309,7 @@ fi
 ## For both slackware and porteus ask if user wants to install packages
 ## to the system or a user defined place for development. Only do this
 ## if the user has not reuqested to suppress questions in $CONF
+[ -z $MERGE ] && MERGE=false
 if [ $CLI ] && [ "$MERGE" = "false" ] && [ `awk '/^NOPROMPTS/ && /false/' $CONF` ]; then
 	read -p "`gettext " Would you like to install the packages (custom paths are supported)? [y/n]"`" -n 1 -r -s && echo
 	if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -316,8 +317,9 @@ if [ $CLI ] && [ "$MERGE" = "false" ] && [ `awk '/^NOPROMPTS/ && /false/' $CONF`
 		read -e -p ">" installpath
 		[ "$installpath" == "" ] && installpath=/ && echo "Installing to system" || echo "Installing to: $installpath"
 		[ ! -d $installpath ] && mkdir -p $installpath
-		for a in $STORAGE/$shorty; do
-			installpkg --terse --root $installpath $a
+		for a in $FINALPKGS; do
+			local b=${a##*/}
+			installpkg --terse --root $installpath $STORAGE/$b
 		done
 	fi
 fi
