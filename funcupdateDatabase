@@ -10,7 +10,8 @@ FROMUPDATEALL=0
 ## Only update if a manual update wasn't already done today
 NOWTIME=`date +%s`
 TLIMIT=`awk -F= '/SKIPDB/{print$NF}' $CONF`
-for a in alien salix slacky ponce slackware slackwarepatches sbo; do
+#salix slacky ponce slackware slackwarepatches sbo
+for a in alien; do
 	if [ "$a" != "sbo" ]; then
 		THENTIME=`stat -c %X $DBDIR/$a/OPTIFEST 2>/dev/null`
 		if [ $(( NOWTIME - THENTIME )) -lt  $TLIMIT ]; then
@@ -35,6 +36,7 @@ done
 
 ## Update the extra-deps and ignore-deps
 echo
+NOWTIME=`date +%s`
 for updateme in $CONFDIR/extra-deps.txt $CONFDIR/ignore-deps.txt; do
 PFILE=${updateme##*/}
 if [ -f $updateme ]; then
@@ -301,6 +303,8 @@ if [ -z $LEAVEMANIFEST ]; then
 ## Last sed inserts 'Package:' at the beginnging of lines ending with txz or tgz
 egrep "Package:|.*\.so|.*\.so\.[0-9].*" $SDIR/MANIFEST|awk -F/ '{print$NF}'| \
 sed '/txz$\|tgz$/ s/^/Package: /' > $SDIR/OPTIFEST
+## Delete heavy weight MANIFEST file (saves over 100Mb)
+rm $SDIR/MANIFEST
 ## Remove compat32/skype_static libraries from OPTIFEST so other packages don't tag it
 ## as a dependency. It will still be available to search and download.
 [[ `grep -o compat32 $SDIR/OPTIFEST` ]] && sed -i '/compat32/,/.txz/{//!d}' $SDIR/OPTIFEST
@@ -334,11 +338,9 @@ if [ -z $LEAVEPACKAGES ]; then
 ## Massage PACKAGES.TXT file for distros that require something excluded
 if [ `egrep -ow "alien|salix|slackware" <<<$1` ]; then
 	## Remove excludes from PACKAGES.TXT
-	#awk -vRS= '$0!~/'$exc'/{print $0RT}' $SDIR/PACKAGES.TXT > $SDIR/PACKAGES2.TXT  ## This leaves a binary file
 	## Workaround to prevent gawk <4.1.0 from creating a binary file.
 	TTT=`awk -vRS= '$0!~/'$exc'/{print $0RT}' $SDIR/PACKAGES.TXT`
 	printf '%s' "$TTT" > $SDIR/PACKAGES2.TXT
-	#cat $SDIR/PACKAGES.TXT|awk -vRS="" -vn="$exc" '$0!~n{print $0RT}' > $SDIR/PACKAGES2.TXT
 	mv $SDIR/PACKAGES2.TXT $SDIR/PACKAGES.TXT
 fi
 fi
