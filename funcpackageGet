@@ -3,9 +3,9 @@
 silent_check_update(){
 if [ ! -e $TMPDIR/checked ]; then
 if [ -e $TMPDIR/vercheck.txt ]; then
-	DBVER1=`awk -F= '/DBVER=/{print$NF}' $CONF`
+	DBVER1=`awk -F= '/DBVER=/{print$NF}' $VERTXT`
 	DBVER2=`awk -F= '/DBVER=/{print$NF}' $TMPDIR/vercheck.txt` || return
-	USMVER1=`awk -F= '/USMVER=/{print$NF}' $CONF`
+	USMVER1=`awk -F= '/USMVER=/{print$NF}' $VERTXT`
 	USMVER2=`awk -F= '/USMVER=/{print$NF}' $TMPDIR/vercheck.txt` || return
 	[ $DBVER2 -gt $DBVER1 ] && HAVEUPDATES=0 && DBSTATUS=available || DBSTATUS="not required"
 	[ $USMVER2 -gt $USMVER1 ] && HAVEUPDATES=0 && USMSTATUS=available || USMSTATUS="not required"

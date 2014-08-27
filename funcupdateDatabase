@@ -82,7 +82,7 @@ if [ ! -e $TMPDIR/isonline ]; then
 fi
 
 RDBVER=`awk -F= '/DBVER/{print$NF}' $TMPDIR/vercheck.txt`
-LDBVER=`awk -F= '/DBVER/{print$NF}' $CONF`
+LDBVER=`awk -F= '/DBVER/{print$NF}' $VERTXT`
 
 ## Database files to download
 local FILES="$(awk -F: '/distro:'$1'$/ { getline; print $NF }' $DISFILES)"
@@ -356,7 +356,7 @@ if [ $FROMUPDATEALL ]; then
     THENTIME=`stat -c %X $CONF 2>/dev/null`
     if [ $(( NOWTIME - THENTIME )) -gt $TLIMIT ]; then
 	echo "Updating config file" && echo
-	[[ `grep -o $LDBVER $CONF` ]] && sed -i "s/$LDBVER/$RDBVER/g" $CONF
+	[[ `grep -o $LDBVER $CONF` ]] && sed -i "s/$LDBVER/$RDBVER/g" $VERTXT
     fi
 fi
 }; export -f update_database
@@ -405,7 +405,7 @@ TXTUPDUSM2="`gettext " Would you like to download it now? [y/n]"`"
 				blue "`gettext " Installing new version now"`"
 				installpkg --terse $STORAGE/$CURRENTUSM || { bold "`gettext "Update failed"`"; cleanup; }
 				echo
-				CVER=`awk -F= '/USMVERSION/{print$NF}' $CONF`
+				CVER=`awk -F= '/USMVERSION/{print$NF}' $VERTXT`
 				echo "`gettext " USM was updated successfully"`"
 				echo "`gettext " You are currently using:"`"
 				bold "USM-v${CVER}"
@@ -426,7 +426,7 @@ TXTUPDUSM2="`gettext " Would you like to download it now? [y/n]"`"
 			installpkg $STORAGE/$CURRENTUSM
 			rm $TMPDIR/.progress
 			sleep 1
-			CVER=`awk -F= '/USMVERSION/{print$NF}' $CONF`
+			CVER=`awk -F= '/USMVERSION/{print$NF}' $VERTXT`
 			gtk_message "`gettext "USM was updated successfully"`" "`gettext "You are currently using: $CVER"`" "Restart the application to complete the update." gtk-yes 500
 		else # User doesn't want to update
 			return

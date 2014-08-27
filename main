@@ -46,7 +46,8 @@ fi
 
 TARGET=usm
 CONFDIR=/etc/usm
-CONF=$CONFDIR/usm.conf
+[ -f $CONFDIR/usm-custom.conf ] && CONF=$CONFDIR/usm-custom.conf || CONF=$CONFDIR/usm.conf
+VERTXT=$CONFDIR/version.txt
 DATADIR=$(awk -F= /PREFIX/'{print$NF}' $CONF)/share/$TARGET
 CURRENTUSM=usm-latest-0.0-noarch-1.txz
 PIDLOCK=/var/lock/usm.$$
@@ -59,6 +60,7 @@ GTKDMIN=0.8.3
 ## ======================================================================
 
 . $CONF
+. $CONFDIR/version.txt
 . $DATADIR/funcelementCreate
 . $DATADIR/funccleanup
 . $DATADIR/funcsystemSetup
@@ -85,6 +87,7 @@ export UPDLINK
 export RESOLVE
 export STORAGE
 export MODULES
+export VERTXT
 LOCALDB=$DBDIR/local
 
 ## These variables are only required in the CLI environment
