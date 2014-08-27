@@ -1,8 +1,10 @@
 +-------------------------
 Thu Aug 27 09:10:12 UTC 2014
-Moved version check out of usm.conf (thank Tome/Bogomips)
+Added version check out of usm.conf (thank Tome/Bogomips)
 Added custom usm-conf.txt path
 Added option to install packages after download (thanks Tome)
+Added symlink (default) in storage folder for doubled packages. (thanks Tome)
+Added removal of MANIFEST file when updating database. Saves over 100Mb.
 
 +-------------------------
 Thu Aug 21 23:03:45 UTC 2014
