@@ -70,7 +70,7 @@ install: check
 	cp png/usm* $(DESTDIR)$(DATADIR)/icons/hicolor/48x48/apps/; \
 	cp conf/*.conf $(DESTDIR)$(SYSCONFDIR)/$(TARGET); \
 	echo "PREFIX=$(PREFIX)" >> $(DESTDIR)$(SYSCONFDIR)/$(TARGET)/$(TARGET).conf; \
-	cp txt/mirror* txt/supp* txt/extra* txt/ignore* txt/version* $(DESTDIR)$(SYSCONFDIR)/$(TARGET); \
+	cp txt/*.txt $(DESTDIR)$(SYSCONFDIR)/$(TARGET); \
 	cp -r i18n/usr $(DESTDIR); \
 	cp usmgui $(DESTDIR)$(BINDIR)
 
