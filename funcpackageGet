@@ -138,31 +138,28 @@ if [ $CLI ]; then
 	if [ $MULTIPKG ]; then
 		if [ `awk '/^NOPROMPTS/ && /false/' $CONF` ]; then
 		echo
-		if [ -f /etc/porteus-version ]; then
-		echo "`gettext " Multiple packages were detected."`"
-		read -p "`gettext " Would you like to merge the packages into one module? [y/n]"`" -n 1 -r -s && echo
-			if [[ $REPLY =~ ^[Yy]$ ]]; then
-				MERGE=true
-					else
-				unset MERGE
-				if [ "$SUBFOLDERPROMPT" == "true" ]; then
-					read -p "`gettext " Would you like to create a subfolder for the files? [y/n]"`" -n 1 -r -s && echo
-					if [[ $REPLY =~ ^[Yy]$ ]]; then
-						MAKESUBFOLDER=true
+			if [ -f /etc/porteus-version ]; then
+			echo "`gettext " Multiple packages were detected."`"
+			read -p "`gettext " Would you like to merge the packages into one module? [y/n]"`" -n 1 -r -s && echo
+				if [[ $REPLY =~ ^[Yy]$ ]]; then
+					MERGE=true
+						else
+					unset MERGE
+					if [ "$SUBFOLDERPROMPT" == "true" ]; then
+						read -p "`gettext " Would you like to create a subfolder for the files? [y/n]"`" -n 1 -r -s && echo
+						[[ $REPLY =~ ^[Yy]$ ]] && MAKESUBFOLDER=true
 					fi
 				fi
 			fi
-		fi
 		fi
 	fi
 	## Ask if user wants to install the packages after downloading
 	if [ -z $MERGE ] && [ `awk '/^NOPROMPTS/ && /false/' $CONF` ]; then
 		read -p "`gettext " Would you like to install the package/s? (custom paths are supported) [y/n]"`" -n 1 -r -s && echo
-		if [[ $REPLY =~ ^[Yy]$ ]]; then installpackages=true; fi
+		[[ $REPLY =~ ^[Yy]$ ]] && installpackages=true
 	fi
 fi
 unset REPLY
-fi
 
 ORIGLNK=`printf '%s\n' ${LINKS[@]}|grep $ORIGINAL`
 ORIGPKG=${ORIGLNK##*/}
