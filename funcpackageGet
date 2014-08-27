@@ -71,7 +71,7 @@ else
 	PKGLIST+=($CHOICE)
 fi
 
-# Do one last duplicate removal. It can't hurt.
+## Do one last duplicate removal. It can't hurt.
 PKGLIST=( `printf '%s\n' ${PKGLIST[@]}|sort -u` )
 
 
@@ -146,7 +146,7 @@ if [ $CLI ]; then
 					else
 				unset MERGE
 				if [ "$SUBFOLDERPROMPT" == "true" ]; then
-					read -p "`gettext " Would you like to create subfolder for the files? [y/n]"`" -n 1 -r -s && echo
+					read -p "`gettext " Would you like to create a subfolder for the files? [y/n]"`" -n 1 -r -s && echo
 					if [[ $REPLY =~ ^[Yy]$ ]]; then
 						MAKESUBFOLDER=true
 					fi
@@ -163,6 +163,7 @@ ORIGPKG=${ORIGLNK##*/}
 SHNAME=${ORIGPKG%-*-*}
 
 if [ `awk '/^NOPROMPTS/ && /false/' $CONF` ]; then
+	## If user wants a subfolder then change STORAGE variable for this run
 	if [ "$MAKESUBFOLDER" = "true" ]; then
 		SUBFOLDER="/$SHNAME"
 		[ ! -d "$STORAGE$SUBFOLDER" ] && mkdir -p "$STORAGE$SUBFOLDER"
@@ -189,6 +190,7 @@ if [ $CLI ]; then
 	fi
 fi
 
+## Get the final package links
 unset frompackageGet
 if [ "$FINALPKGS" ]; then
 	for a in $FINALPKGS; do
@@ -201,8 +203,10 @@ else
 	cleanup
 fi
 
+## Is there more than 1 package?
 [ ${#LINKS[@]} -gt 1 ] && MULTIPKG=true || unset MULTIPKG
 
+## If user wants automatic update checks then do it
 if [ "`awk -F= '/AUTOCHECK=/{print$NF}' $CONF`" == "true" ]; then
 	silent_check_update
 fi
@@ -212,9 +216,11 @@ if [ $GUI ]; then
 	gtk_download
 fi
 
+## Download the packages
 for a in ${LINKS[@]}; do
 	local shorty=${a##*/}
 	if [ -e $STORAGE/$shorty ]; then
+		## Don't download if it already exists
 		[ $CLI ] && echo "$shorty" "`gettext "already exists"`"
 		continue
 			else
@@ -271,6 +277,7 @@ if [ -e /etc/porteus-version ]; then
 			sleep 1
 		fi fi
 	else
+	## CLI post download operations
 		if [ $MULTIPKG ]; then
 			if [ $MERGE ]; then
 				mkdir $STORAGE/merged
@@ -296,6 +303,22 @@ if [ -e /etc/porteus-version ]; then
 			done
 		fi
 				
+	fi
+fi
+
+## For both slackware and porteus ask if user wants to install packages
+## to the system or a user defined place for development. Only do this
+## if the user has not reuqested to suppress questions in $CONF
+if [ $CLI ] && [ "$MERGE" = "false" ] && [ `awk '/^NOPROMPTS/ && /false/' $CONF` ]; then
+	read -p "`gettext " Would you like to install the packages (custom paths are supported)? [y/n]"`" -n 1 -r -s && echo
+	if [[ $REPLY =~ ^[Yy]$ ]]; then
+		echo "`gettext " Enter a custom path or press enter to install to the system: "`"
+		read -e -p ">" installpath
+		[ "$installpath" == "" ] && installpath=/ && echo "Installing to system" || echo "Installing to: $installpath"
+		[ ! -d $installpath ] && mkdir -p $installpath
+		for a in $STORAGE/$shorty; do
+			installpkg --terse --root $installpath $a
+		done
 	fi
 fi
 
