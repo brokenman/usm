@@ -1,4 +1,10 @@
 +-------------------------
+Thu Aug 27 09:10:12 UTC 2014
+Moved version check out of usm.conf (thank Tome/Bogomips)
+Added custom usm-conf.txt path
+Added option to install packages after download (thanks Tome)
+
++-------------------------
 Thu Aug 21 23:03:45 UTC 2014
 Fixed module question showing in slackware (thanks Slaxmax)
 Fixed deselect option not working in CLI (thanks Slaxmax)
