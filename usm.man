@@ -10,11 +10,11 @@ Usage:    usm  <option>  [argument]
 .SH DESCRIPTION
 usm is a unified slackware package manager that integrates various
 .br
-repositories including slackware, slacky, slackers, salix and alien.
+repositories including slackware, slacky, salix and alien.
 .SH OPTIONS
 .TP
 \fB-u\fP
-[sbo|alien|salix|ponce|slackware|slacky|all|usm] Update databases.
+[sbo|alien|salix|ponce|slackware|slacky|all|usm] Update databases (or usm).
 .TP
 \fB-k\fP
 [package-name] Keyword search
@@ -63,6 +63,8 @@ Show help
 \fBnoprompts\fP - Only ask essential questions.
 .TP
 \fBnodeps\fP - Only download chosen package.
+.TP
+\fBinfo\fP - Output useful information
 .P
 .TP
 \fBSlackbuild options\fP
@@ -89,6 +91,8 @@ usm --update slacky
 usm update slacky
 .P
 .SH USAGE EXAMPLES
+\fBusm -u usm\fP Will check for and install updates to USM itself.
+.br
 \fBusm -d\fP with no argument means ALL installed packages will be processed for dependencies.
 .br
 \fBusm -s\fP with a library name will attempt to find the mother package for the library given.
@@ -97,6 +101,8 @@ usm update slacky
 .br
 \fBusm -k lossy compression\fP searches all package descriptions for packages that contain both words.
 .SH EXTRA INFO
+You may use a custom configuration file so it does not get over written when you update. The path should be /etc/usm/usm-custom.conf
+.br
 For more info visit: http://sourceforge.net/p/usm/wiki/Home/
 .SH BUGS
 See wiki above. Report bugs to: brokenman@porteus.org
