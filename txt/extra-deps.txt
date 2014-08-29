@@ -79,7 +79,7 @@ python,gst-python,pycairo,pygobject,pygtk
 rhino
 
 #  pitivi
-python,gst-python,pygtk,pycairo,pygobject
+python,gst-python,pygtk,pycairo,pygobject,pyxdg,pysetuptools,pygoocanvas,gnonlin,goocanvas,gstreamer,gst-plugins-base,gst-plugins-good,libcaca,libsoup,zope.interface
 
 #  pygtk
 pycairo,pygobject
