@@ -62,7 +62,7 @@ fi
 
 for a in `grep "\=>" $CACHE|sort -u|awk '{print$1}'`; do
     unset DPKG RESULT CHOICE
-    local FPKG=`find -L $DBDIR -name OPTIFEST|xargs grep $a|sort -u`
+    local FPKG=`find -L $DBDIR -name OPTIFEST|xargs grep $a|sort -u|grep -v "\.debug"`
     if [ "$FPKG" ]; then
         echo "`gettext "Searching"`" $txtbld "$a:" $rst "`gettext "found"`" "`wc -w <<<$FPKG`" "`gettext "packages."`"
         for DIST in `echo $FPKG|tr " " "\n"|awk -F/ '{print $(NF-1)}'`; do
@@ -70,12 +70,16 @@ for a in `grep "\=>" $CACHE|sort -u|awk '{print$1}'`; do
         done
         for CH in ${DPKG[@]}; do
             if [[ `grep $CH <<<${PKGLIST[@]}` ]]; then
-                echo "`gettext "Package already in download list."`" && echo
+                echo "`printf '%s\n' ${PKGLIST[@]}|grep $CH` already in download list." && echo
                 continue 2
             fi
         done
-        RESULT="${DPKG[@]} None"
-        system_deps_download_choice $RESULT
+        if [ `echo ${#DPKG[@]}` -gt 1 ]; then
+			RESULT="${DPKG[@]} None"
+			system_deps_download_choice $RESULT
+		elif [ ${#DPKG[@]} -eq 1 ]; then
+			CHOICE=${DPKG[@]}
+        fi
         [ "$CHOICE" != "None" ] && PKGLIST+=( $CHOICE ) || continue
         package_get_link $CHOICE
     else
@@ -214,7 +218,7 @@ fi
 
 for a in `grep "\=>" $CACHE|sort -u|awk '{print$1}'`; do
     unset DPKG RESULT CHOICE
-    local FPKG=`find -L $DBDIR -name OPTIFEST|xargs grep $a|sort -u`
+    local FPKG=`find -L $DBDIR -name OPTIFEST|xargs grep $a|sort -u|grep -v "\.debug"`
     if [ "$FPKG" ]; then
         echo "`gettext "Searching"`" $txtbld "$a:" $rst "`gettext "found"`" "`wc -w <<<$FPKG`" "`gettext "packages."`"
         for DIST in `echo $FPKG|tr " " "\n"|awk -F/ '{print $(NF-1)}'`; do
@@ -222,13 +226,17 @@ for a in `grep "\=>" $CACHE|sort -u|awk '{print$1}'`; do
         done
         for CH in ${DPKG[@]}; do
             if [[ `grep $CH <<<${PKGLIST[@]}` ]]; then
-                echo "`gettext "Package already in download list."`" && echo
+                echo "`printf '%s\n' ${PKGLIST[@]}|grep $CH` already in download list." && echo
                 continue 2
             fi
         done
-        RESULT="${DPKG[@]} None"
-        system_deps_download_choice $RESULT
-        [ "$CHOICE" != "None" ] && PKGLIST+=( $CHOICE ) || continue
+		if [ `echo ${#DPKG[@]}` -gt 1 ]; then
+			RESULT="${DPKG[@]} None"
+			system_deps_download_choice $RESULT
+		elif [ `echo ${#DPKG[@]}` -eq 1 ]; then
+			CHOICE=${DPKG[@]}
+		fi
+		[ "$CHOICE" != "None" ] && PKGLIST+=( $CHOICE ) || continue
         package_get_link $CHOICE
     else
         echo "`gettext "Searching"`" $txtbld "$a:" $rst "`gettext "found"`" "0" "`gettext "packages."`"
@@ -263,12 +271,12 @@ if [ $CLI ]; then
 			PKGPORT=0
 			activate $PACKAGE
 		fi
-fi
+    fi
 fi
 
 system_deps_single /var/log/packages/$PKGNAMESHORT
 
-echo "$PACKAGE" "`gettext "was isntalled."`"
+echo "$PACKAGE" "`gettext "was ins	talled."`"
 read -p "`gettext "Would you like to uninstall the package [y/n]"`" -n 1 -r -s && echo
 [[ ! $REPLY =~ ^[Yy]$ ]] && cleanup
 
