@@ -350,13 +350,25 @@ if [ $GUI ]; then
 	[ ! `pgrep -f GTK_TAILBOXNB` ] && gtk_tailboxnb 80 &
 fi
 
+# Get the depth of dep resolution
+[ "$DEPTH" ] && dlimit=${DEPTH}
+
+# Set depth loop
+dloop=0
+
 until [ ${#PKGQ[@]} -eq 0 ]; do
 	local PKG=${PKGQ[0]}
+	## If depth argument was supplied by CLI then check it and exit if reached
+	if [ $CLI ] && [ $DEPTH ]; then
+		[ $dloop -eq $dlimit ] && { echo "Depth $dlimit of resolution reached. Exiting."; cleanup; } 
+	fi
 	{ echo; echo "`gettext "Processing: "`" $txtbld "$PKG" $rst; } | tee $TMPDIR/.stream
 	sleep 2
+	## Find distro that has dependency
 	TARGLIB=`find -L $DBDIR -type f -name "LIBS.TXT" | xargs grep -i "^$PKG" | head -n1 | awk -F: '{print$1}'`
 	[ $CLI ] && [ -z $TARGLIB ] && fatality "$SCRIPT $FUNCNAME $LINENO" "`gettext "Brokenman needs to update database. Could not find:"`" "LIBS.TXT"
 	[ $GUI ] && [ -z $TARGLIB ] && { echo "`gettext "Brokenman needs to update database. Could not find:"`" "LIBS.TXT" > $TMPDIR/.stream; gtk_message2 "`gettext "Fatal error"`" "LIBS.TXT"; exit; }
+	## Find mother package
 	HASDEPS=`grep -A1 "$PKG" $TARGLIB|tail -n1|grep -v ".*\.t.z"`
 	if [[ ! -z $HASDEPS ]]; then
 		ALLDEPS=`sed 's@,@@g' <<<$HASDEPS`
@@ -444,10 +456,13 @@ until [ ${#PKGQ[@]} -eq 0 ]; do
 		PKGQ2=( `printf '%s\n' ${PKGQ[@]}|awk '!x[$0]++'` )
 		PKGQ=("${PKGQ2[@]}") && unset PKGQ2
 		echo
+		(( dloop++ ))
 		continue
 	else
 	PKGQ=("${PKGQ[@]:1}")
 	fi
+	## Increment dep resolution counter
+	(( dloop++ ))
 done # Ends while loop for ${#PKGQ[@]}
 }
 

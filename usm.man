@@ -64,6 +64,8 @@ Show help
 .TP
 \fBnodeps\fP - Only download chosen package.
 .TP
+\fBdepth=n\fP - Quit after n loops of dep resolution.
+.TP
 \fBinfo\fP - Output useful information
 .P
 .TP

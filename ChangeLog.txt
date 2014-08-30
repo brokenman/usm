@@ -1,4 +1,10 @@
 +-------------------------
+Sat Aug 30 10:04:14 UTC 2014
+Changed symlinks creation to default false
+Changed None in systemDeps resolution to always be number 1 (thanks Bogomips)
+Added depth=n argument in CLI to quit after given loops of resolution. (thanks Bogomips)
+
++-------------------------
 Thu Aug 27 09:10:12 UTC 2014
 Added version check out of usm.conf (thank Tome/Bogomips)
 Added custom usm-conf.txt path
