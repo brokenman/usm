@@ -75,7 +75,8 @@ for a in `grep "\=>" $CACHE|sort -u|awk '{print$1}'`; do
             fi
         done
         if [ `echo ${#DPKG[@]}` -gt 1 ]; then
-			RESULT="${DPKG[@]} None"
+			RESULT="None ${DPKG[@]}"
+			echo
 			system_deps_download_choice $RESULT
 		elif [ ${#DPKG[@]} -eq 1 ]; then
 			CHOICE=${DPKG[@]}
@@ -231,7 +232,8 @@ for a in `grep "\=>" $CACHE|sort -u|awk '{print$1}'`; do
             fi
         done
 		if [ `echo ${#DPKG[@]}` -gt 1 ]; then
-			RESULT="${DPKG[@]} None"
+			RESULT="None ${DPKG[@]}"
+			echo
 			system_deps_download_choice $RESULT
 		elif [ `echo ${#DPKG[@]}` -eq 1 ]; then
 			CHOICE=${DPKG[@]}
