@@ -254,7 +254,6 @@ help_check $ARG1 && help_give "`gettext "usm -g <package>"`" "`gettext "For exam
 [ `grep -o linkso <<<$@` ] && export LINKSONLY=0 || unset links
 [ `grep -o noprompt <<<$@` ] && export NOPROMPTS=true
 [ `grep -o depth <<<$@` ] && export DEPTH=`grep -o "[^ ]*depth[^ ]*" <<<$@|cut -d= -f2`
-echo "DEPTH:$DEPTH" ### TESTING
 package_get $ARG1
 cleanup
 ;;
