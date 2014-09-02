@@ -216,7 +216,7 @@ if [ -z $2 ]; then
 	echo "`gettext "usm application information"`"
 	echo
 	echo "`gettext "USM version: "`" "$USMVERSION"
-	echo "`gettext "DB version: "`" `awk -F= '/DBVER/{print$NF}' $CONF`
+	echo "`gettext "DB version: "`" `awk -F= '/DBVER/{print$NF}' $CONFDIR/version.txt`
 	echo "`gettext "Current storage:"`" "$STORAGE"
 	echo "`gettext "Current config:"`" "$CONF"
 	echo "`gettext "Current platform:"`" "$PLATFORM"
