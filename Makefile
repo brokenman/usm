@@ -13,7 +13,7 @@ STRIP_COMMENTS?=true
 
 # You shouldn't need to edit anything below this -----------------------
 TARGET=`grep "TARGET=" main | sed 's|.*=||'`
-VERSION=`grep "USMVERSION=" conf/usm.conf | sed 's|.*=||'`
+VERSION=`grep "USMVERSION=" txt/version.txt | sed 's|.*=||'`
 
 .PHONY: all check dist install uninstall
 
