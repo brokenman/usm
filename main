@@ -160,10 +160,13 @@ fi
 echo $txtbld "`gettext "You are using USM version:"`" $rst  "$USMVERSION" && \
 cleanup
 
+## Set a variable for arguments that can skip system_setup
+[ `egrep -o "info|set" <<<$@` ] && skipsetup=1
+
 ## Prepare the system for takeoff
 ## If tagfile exists then we are re-calling a CLI part of this
 ## script from the GUI so we don't want to rerun the setup
-[ -z $RECALL ] && system_setup
+[ -z $RECALL ] && [ -z skipsetup ] && system_setup
 
 ## Large case for CLI arguments
 if [ $CLI ]; then
@@ -216,8 +219,8 @@ if [ -z $2 ]; then
 	echo "`gettext "Current storage:"`" "$STORAGE"
 	echo "`gettext "Current config:"`" "$CONF"
 	echo "`gettext "Current platform:"`" "$PLATFORM"
-	echo "`gettext "Current arch:"`" "$ARCH"
-	echo "`gettext "Slackware"`" "$SLACKVER"
+	echo "`gettext "Current arch:"`" "`uname -m`"
+	echo "`gettext "Slackware"`" "`cat /etc/slackware-version`"
 	echo "`gettext "Current kernel"`" `uname -r`
 	echo "`gettext "Current distros:"`" "$DISTROS"
 	cat /proc/cmdline
