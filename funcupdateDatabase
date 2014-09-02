@@ -367,9 +367,10 @@ fi
 ## ----------------------------------------------------------------------
 ## Check for and update USM
 update_usm(){
-is_online $UPDLINK 
+## Do quick online check
+is_online $UPDLINK
 [ $? -eq 1 ] && { gtk_message1 "`gettext "The server could not be reached. Please try later."`"; return; }
-
+## Download the version check file
 download $UPDLINK/configs/vercheck.txt $TMPDIR
 
 echo

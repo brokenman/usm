@@ -161,12 +161,13 @@ echo $txtbld "`gettext "You are using USM version:"`" $rst  "$USMVERSION" && \
 cleanup
 
 ## Set a variable for arguments that can skip system_setup
-[ `egrep -o "info|set" <<<$@` ] && skipsetup=1
+[ `egrep -wo "info|set" <<<$@` ] && skipsetup=1
 
 ## Prepare the system for takeoff
 ## If tagfile exists then we are re-calling a CLI part of this
 ## script from the GUI so we don't want to rerun the setup
-[ -z $RECALL ] && [ -z skipsetup ] && system_setup
+[ -z $RECALL ] && [ -z $skipsetup ] && system_setup
+unset skipsetup
 
 ## Large case for CLI arguments
 if [ $CLI ]; then
