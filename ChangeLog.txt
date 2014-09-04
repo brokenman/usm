@@ -1,4 +1,8 @@
 +-------------------------
+Thu Sep 04 23:21:11 UTC 2014
+Added package status report (thanks Bogomips)
+
++-------------------------
 Sat Aug 30 10:04:14 UTC 2014
 Changed symlinks creation to default false
 Changed None in systemDeps resolution to always be number 1 (thanks Bogomips)
