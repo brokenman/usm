@@ -102,7 +102,9 @@ for pkg in ${PKGLIST[@]}; do
 	local HSIZE=`grep -A3 "NAME:  $pkg" $DBDIR/$DIST/PACKAGES.TXT|grep -i "(compressed)"|awk -F: '{ gsub (" ", "", $0); print$NF}'`
 	declare -i CSIZE=`tr -d [:alpha:] <<<$HSIZE`
 	let TSIZE=( $TSIZE+$CSIZE )
-	DISP+=( "$pkg [$HSIZE]" )
+	## See if package is installed
+	check_installed $pkg
+	DISP+=( "$pkg [$HSIZE] [$pstatus]" )
 done
 
 [ $TSIZE -gt 1024 ] && { TSIZE=$((TSIZE / 10**3)); DSIZE="$TSIZE MB"; } || DSIZE="$TSIZE KB"
@@ -154,6 +156,7 @@ if [ $CLI ]; then
 		fi
 	fi
 	## Ask if user wants to install the packages after downloading
+	[ "$MERGE" == "false" ] && unset MERGE
 	if [ -z $MERGE ] && [ `awk '/^NOPROMPTS/ && /false/' $CONF` ]; then
 		read -p "`gettext " Would you like to install the package/s? (custom paths are supported) [y/n]"`" -n 1 -r -s && echo
 		[[ $REPLY =~ ^[Yy]$ ]] && installpackages=true
@@ -248,8 +251,10 @@ done
 [ -e $TMPDIR/.message ] && rm $TMPDIR/.message
 wait
 
+## Only applies to porteus
 if [ -e /etc/porteus-version ]; then
 	if [ $GUI ]; then
+		## User wants to merge packages
 		if [ -e $TMPDIR/merge.tmp ] && [ `grep true $TMPDIR/merge.tmp` ]; then
 			rm -rf $TMPDIR/merge 2>/dev/null
 			mkdir $TMPDIR/merge
@@ -274,7 +279,7 @@ if [ -e /etc/porteus-version ]; then
 			kill_progress 2>/dev/null
 			sleep 1
 		else
-				
+		## User wants to convert packages to modules		
 		if [ "$CONVERTPKGS" == "true" ];then
 			export STATE=BUILDMODULES
 			touch $TMPDIR/proglock
@@ -327,7 +332,8 @@ if [ $installpackages ]; then
 	[ ! -d $installpath ] && mkdir -p $installpath
 	for a in $FINALPKGS; do
 		local b=${a##*/}
-		installpkg --terse --root $installpath $STORAGE/$b
+		#installpkg --terse --root $installpath $STORAGE/$b
+		ROOT=$installpath upgradepkg --install-new $STORAGE/$b
 	done
 fi
 
@@ -464,6 +470,28 @@ until [ ${#PKGQ[@]} -eq 0 ]; do
 	## Increment dep resolution counter
 	(( dloop++ ))
 done # Ends while loop for ${#PKGQ[@]}
+}
+
+function check_installed(){
+local fpkg=$1
+## fpwv is found package with version
+## lpwv is local package with ver
+local fpwv="${fpkg%-*-*}"
+local fp=${fpkg%-*-*-*}-
+isinstalled=`ls -1 /var/log/packages|grep "^$fp"`
+if [ "$isinstalled" ]; then
+	local lpwv=${isinstalled%-*-*}
+	if [ "$fpwv" == "$lpwv" ]; then
+		pstatus="installed"
+	## The package given here is the more current version
+	elif [ "`echo $fpwv $lpwv|tr ' ' '\n'|sort -V|tail -n1`" == "$fpwv" ]; then
+		pstatus="upgrade"
+	else
+		pstatus="downgrade"
+	fi
+else
+	pstatus="not installed"
+fi
 }
 
 function convert_size(){
