@@ -379,16 +379,9 @@ RDBVER=`awk -F"=" /DBVER/'{print$NF}' $TMPDIR/vercheck.txt`
 RUSMVER=`awk -F"=" /USMVER/'{print$NF}' $TMPDIR/vercheck.txt`
 
 if [ $RDBVER -gt $DBVER ]; then
-	if [ $CLI ]; then
 		echo "`gettext " An update is available for the usm database files."`"
 		echo "`gettext " Please run:"`" $txtbld "usm -u all" $rst
 		echo
-	else
-		gtk_message2 "`gettext " An update is available for the usm database files."`" "`gettext "Please run: update all"`"
-	fi
-else
-	[ $CLI ] && { echo "`gettext "No database updates were found."`"; echo; } || \
-	gtk_message1 "`gettext "No database updates were found."`"
 fi
 
 if [ $RUSMVER -gt $USMVER ]; then

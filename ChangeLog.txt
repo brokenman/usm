@@ -1,4 +1,8 @@
 +-------------------------
+Sun Sep 14 13:47:00 UTC 2014
+Fixed usm update checking for database updates (thanks Ed_P)
+
++-------------------------
 Thu Sep 04 23:21:11 UTC 2014
 Added package status report (thanks Bogomips)
 
