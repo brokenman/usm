@@ -44,14 +44,14 @@ for a in $RESULT; do
     (( CNT++ ))
     local DIS=`awk -F/ '{print $(NF-1)}' <<<$a`
     local PKG=`awk -F: '{print$NF}' <<<"$a"`
+    local SHT="${PKG%-*-*-*}-"
+    [[ `ls /var/log/packages/$SHT* 2>/dev/null` ]] && local STA="installed" || local STA="not installed"
     if [ $GUI ]; then
 		local SIZ=`grep -A4 $PKG $DBDIR/$DIS/PACKAGES.TXT|grep "(comp"|awk -F: '{print$NF}'|sed 's/^ *//g'`
-		local SHT="${PKG%-*-*-*}-"
-		[[ `ls /var/log/packages/$SHT* 2>/dev/null` ]] && local STA="installed" || local STA="not installed"
 		DOUTPUT+=( "$PKG|$SIZ|$DIS|$STA" )
 		printf '%s\n' "${DOUTPUT[@]}" > $TMPDIR/filelist
 	else # CLI CODE
-		echo "$PKG" "`gettext "was found in"`" "$DIS"
+		echo "$PKG" "`gettext "was found in"`" "$DIS [$STA]"
 	fi
 done
 
