@@ -1,4 +1,8 @@
 +-------------------------
+Mon Sep 30 22:47:03 UTC 2014
+Added status for search in CLI (thanks bogomips)
+
++-------------------------
 Sun Sep 14 13:47:00 UTC 2014
 Fixed usm update checking for database updates (thanks Ed_P)
 
