@@ -176,6 +176,7 @@ case $1 in
 -u|-update|--update|update )
 ## TRANSLATORS: Do not translate <distro>
 [ "$2" == "?" ] && help_give "`gettext "usm -u <distro>"`" "`gettext "For example: usm -u slackware"`"
+[ `grep -o noprompt <<<$@` ] || grep "NOPROMTPS=true" $CONF && export NOPROMPTS=true
 shift
 [ ! `egrep -o "slackware|slackwarepatches|slacky|salix|alien|ponce|sbo|usm|all" <<<"$1"` ] && \
 help_give "`gettext "usm -u <distro>"`" "`gettext "For example: usm -u slackware"`"
