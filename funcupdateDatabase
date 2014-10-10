@@ -370,6 +370,7 @@ update_usm(){
 ## Do quick online check
 is_online $UPDLINK
 [ $? -eq 1 ] && { gtk_message1 "`gettext "The server could not be reached. Please try later."`"; return; }
+
 ## Download the version check file
 download $UPDLINK/configs/vercheck.txt $TMPDIR
 
@@ -389,12 +390,18 @@ TXTUPDUSM1="`gettext " A new version of USM is available."`"
 TXTUPDUSM2="`gettext " Would you like to download it now? [y/n]"`"
 	if [ $CLI ]; then
 		echo "$TXTUPDUSM1"
-		read -p "$TXTUPDUSM2" -n 1 -r -s && echo
+		## If NOPROMPTS is used then supress questions
+		if [ "$NOPROMPTS" == "false" ]; then
+			read -p "$TXTUPDUSM2" -n 1 -r -s && echo
+		else
+			REPLY=Y
+		fi
 		if [[ $REPLY =~ ^[Yy]$ ]]; then
 			[ ! -d $STORAGE ] && mkdir $STORAGE
 			find $STORAGE -type f -name "usm-*noarch*.txz"|xargs rm 2>/dev/null
 			download $UPDLINK/$CURRENTUSM $STORAGE
-			read -p "`gettext " Would you like to install it now? [y/n]"`" -n 1 -r -s && echo
+			## If NOPROMPTS is used then supress questions
+			[ "$NOPROMTPS" == "false" ] && read -p "`gettext " Would you like to install it now? [y/n]"`" -n 1 -r -s && echo
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
 				for a in /var/log/packages/usm-*; do removepkg $a 2>/dev/null; done
 				blue "`gettext " Installing new version now"`"
@@ -407,6 +414,7 @@ TXTUPDUSM2="`gettext " Would you like to download it now? [y/n]"`"
 				cleanup
 			fi
 		fi
+		unset REPLY
 	else # GUI code
 		gtk_yesno "$TXTUPDUSM1" "$TXTUPDUSM2"
 		if [ `grep "Yes" $TMPDIR/.yesno` ]; then
