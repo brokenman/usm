@@ -350,14 +350,14 @@ unset LEAVEMANIFEST LEAVESUPPLIMENTS LEAVEPACKAGES exc SDIR
 [ $GUI ] && [ -z $FROMUPDATEALL ] && echo && green "`gettext "You can now close this window"`"
 echo
 
-## Update the config file
+## Update the version.txt file
 if [ $FROMUPDATEALL ]; then
     NOWTIME=`date +%s`
     TLIMIT=`awk -F= '/SKIPDB/{print$NF}' $CONF`
-    THENTIME=`stat -c %X $CONF 2>/dev/null`
+    THENTIME=`stat -c %X $VERTXT 2>/dev/null`
     if [ $(( NOWTIME - THENTIME )) -gt $TLIMIT ]; then
 	echo "Updating config file" && echo
-	[[ `grep -o $LDBVER $CONF` ]] && sed -i "s/$LDBVER/$RDBVER/g" $VERTXT
+	[[ `grep -o $LDBVER $VERTXT` ]] && sed -i "s/$LDBVER/$RDBVER/g" $VERTXT
     fi
 fi
 }; export -f update_database
