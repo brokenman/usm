@@ -129,7 +129,7 @@ trap 'cleanup' 2 14 15
 ## Set temporary directory and error log
 ## If tagfile exists then we are re-calling a CLI part of this
 ## script from the GUI so we don't want to rerun the setup
-RECALL=`find /tmp -type f -name ".tag"`
+RECALL=`find /tmp -type f -name ".tagusm"`
 if [ -z $RECALL ]; then
 	rm -rf /tmp/usm.* 2>/dev/null
 	TMPDIR=$(mktemp -p /tmp -d usm.XXXXXX 2>/dev/null)
@@ -453,14 +453,14 @@ export USM_MAIN='
 		<menuitem icon="usmslackware"><label>'$(gettext "Update")' '$a' '$(gettext "database")'</label>
 		<variable>'$a'</variable>
 ## <---------------- We need to create a tag file so calling this script again doesnt do setup
-		<action>touch '$TMPDIR'/.tag</action>
+		<action>touch '$TMPDIR'/.tagusm</action>
 		<action>gtk_terminal &</action>
 		<action>echo "usm -u '$a'" > '$TMPDIR'/term1.tmp</action>
 		</menuitem>'; done`"'
 		
 	<menuitem icon="gtk-refresh"><label>'$(gettext "Update all")'</label>
 ## <---------------- We need to create a tag file so calling this script again doesnt do setup
-		<action>touch '$TMPDIR'/.tag</action>
+		<action>touch '$TMPDIR'/.tagusm</action>
 		<action>gtk_terminal &</action>
 		<action>echo "usm -u all" > '$TMPDIR'/term1.tmp</action>
 	</menuitem>
