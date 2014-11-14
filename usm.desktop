@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=USM
+Name=USM (Unified Slackware package Manager)
 Comment=Unified Slackware Package Manager
 Exec=/opt/porteus-scripts/xorg/psu /usr/bin/usmgui
 Terminal=false
