@@ -51,7 +51,6 @@ for a in $RESULT; do
     if [ "$LFND1" ]; then
 		local LFND=${LFND1%-*-*}
 		local RFND=${PKG%-*-*}
-		[ "$LFND" = "$RFND" ] && STA="installed"
 		if [ `echo $LFND $RFND|tr ' ' '\n'|sort -V|head -n1` = "$LFND" ]; then
 				STA="upgrade"
 			else
@@ -59,6 +58,7 @@ for a in $RESULT; do
 					STA="downgrade"
 				fi
 		fi
+		[ "$LFND" = "$RFND" ] && STA="installed"
 	else
 		STA="not installed"
     fi
