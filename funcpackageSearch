@@ -42,10 +42,26 @@ echo
 
 for a in $RESULT; do
     (( CNT++ ))
+    unset DIS PKG LNG SHT LFND1 LFND RFND STA SIZ
     local DIS=`awk -F/ '{print $(NF-1)}' <<<$a`
     local PKG=`awk -F: '{print$NF}' <<<"$a"`
     local SHT="${PKG%-*-*-*}-"
-    [[ `ls /var/log/packages/$SHT* 2>/dev/null` ]] && local STA="installed" || local STA="not installed"
+    #[[ `ls /var/log/packages/$SHT* 2>/dev/null` ]] && local STA="installed" || local STA="not installed"
+    local LFND1=`ls /var/log/packages|grep $SHT*`
+    if [ "$LFND1" ]; then
+		local LFND=${LFND1%-*-*}
+		local RFND=${PKG%-*-*}
+		[ "$LFND" = "$RFND" ] && STA="installed"
+		if [ `echo $LFND $RFND|tr ' ' '\n'|sort -V|head -n1` = "$LFND" ]; then
+				STA="upgrade"
+			else
+				if [ `echo $LFND $RFND|tr ' ' '\n'|sort -V|head -n1` = "$RFND" ]; then
+					STA="downgrade"
+				fi
+		fi
+	else
+		STA="not installed"
+    fi
     if [ $GUI ]; then
 		local SIZ=`grep -A4 $PKG $DBDIR/$DIS/PACKAGES.TXT|grep "(comp"|awk -F: '{print$NF}'|sed 's/^ *//g'`
 		DOUTPUT+=( "$PKG|$SIZ|$DIS|$STA" )
