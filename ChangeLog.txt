@@ -1,3 +1,12 @@
+Sun Dec 14 18:56:32 UTC 2014
+Added python deps to bleachbit
+Added package version check for GUI
+
++-------------------------
+Fri Nov 01 15:29:28 UTC 2014
+Added info switch to skip startup function
+Fixed .tag file name
+
 +-------------------------
 Sun Oct 26 14:13:32 UTC 2014
 Fixed version.txt update in update all
