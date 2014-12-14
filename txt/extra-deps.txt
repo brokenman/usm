@@ -9,6 +9,9 @@ tk
 #  atunes
 jdk
 
+# bleachbit
+python,pygtk,pycairo,pygobject
+
 #  bluez
 bluez-firmware
 
