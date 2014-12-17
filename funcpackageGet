@@ -255,7 +255,7 @@ wait
 if [ -e /etc/porteus-version ]; then
 	if [ $GUI ]; then
 		## User wants to merge packages
-		if [ -e $TMPDIR/merge.tmp ] && [ `grep true $TMPDIR/merge.tmp` ]; then
+		if [ `grep -o "MERGE=true" $CONF` ]; then
 			rm -rf $TMPDIR/merge 2>/dev/null
 			mkdir $TMPDIR/merge
 			rm -f $TMPDIR/.stream 2>/dev/null
