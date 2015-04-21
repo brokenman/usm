@@ -563,6 +563,20 @@ export USM_MAIN='
 			<label>'$(gettext "Convert Slackware packages to Porteus modules.")'</label>
 			<default>'$MODULES'</default>
 		</checkbox>'; fi`"'
+## <-------- PORTEUS ONLY activate modules
+		'"`if [ -e /etc/porteus-version ]; then
+		echo '<checkbox tooltip-text="'$(gettext "All modules downloaded will automatically be activated.")'">
+			<label>'$(gettext "Activate modules after converting/downloading.")'</label>
+			<default>'$ACTIVATEMOD'</default>
+			<action>if true sed -i 's/ACTIVATEMOD=false/ACTIVATEMOD=true/g' $CONF</action>
+			<action>if false sed -i 's/ACTIVATEMOD=true/ACTIVATEMOD=false/g' $CONF</action>
+		</checkbox>'; fi`"'
+		<checkbox tooltip-text="'$(gettext "Remove slackware packages after they have been downloaded or installed.")'">
+			<label>'$(gettext "Remove slackware packages after install/download.")'</label>
+			<default>'$REMOVETXZ'</default>
+			<action>if true sed -i 's/REMOVETXZ=false/REMOVETXZ=true/g' $CONF</action>
+			<action>if false sed -i 's/REMOVETXZ=true/REMOVETXZ=false/g' $CONF</action>
+		</checkbox>
 		<checkbox tooltip-text="'$(gettext "Do not show prompt to open target folder. For CLI this means do NOT show any prompts.")'">
 			<label>'$(gettext "Disable prompts. Only ask essential questions.")'</label>
 			<default>'`awk -F= '/NOPROMPTS=/{print$NF}' $CONF`'</default>
