@@ -159,7 +159,7 @@ if [ $CLI ]; then
 	[ "$MERGE" == "false" ] && unset MERGE
 	if [ -z $MERGE ] && [ `awk '/^NOPROMPTS/ && /false/' $CONF` ]; then
 		read -p "`gettext " Would you like to install the package/s? (custom paths are supported) [y/n]"`" -n 1 -r -s && echo
-		[[ $REPLY =~ ^[Yy]$ ]] && installpackages=true
+		[[ $REPLY =~ ^[Yy]$ ]] && { installpackages=true; ACTIVATEMOD=true; } || ACTIVATEMOD=false
 	fi
 fi
 unset REPLY
@@ -274,6 +274,7 @@ if [ -e /etc/porteus-version ]; then
 			local bundlepkg=${ORIGPKG}
 			local bundlename=${bundlepkg%-*}-bundle.xzm
 			dir2xzm $TMPDIR/merge $STORAGE/$bundlename > $TMPDIR/.progress
+			[ "$ACTIVATEMOD" = "true" ] && activate $STORAGE/$bundlename
 			rm $TMPDIR/proglock
 			sleep 0.4
 			kill_progress 2>/dev/null
@@ -288,6 +289,8 @@ if [ -e /etc/porteus-version ]; then
 				local shorty=${a##*/}
 				echo "$shorty" > $TMPDIR/.message
 				txz2xzm $STORAGE/$shorty > $TMPDIR/.progress
+				modcon=${shorty%.*}.xzm
+				[ "$ACTIVATEMOD" = "true" ] && activate $STORAGE/$modcon
 			done
 			rm $TMPDIR/proglock
 			sleep 0.4
@@ -306,6 +309,7 @@ if [ -e /etc/porteus-version ]; then
 				local bundlepkg=${ORIGPKG}
 				local bundlename=${bundlepkg%-*}-bundle.xzm
 				dir2xzm $STORAGE/merged $STORAGE/$bundlename
+				[ "$ACTIVATEMOD" = "true" ] && activate $STORAGE/$bundlename
 				rm -rf $STORAGE/merged
 				echo
 				echo "$STORAGE/$bundlename is ready."
@@ -318,6 +322,8 @@ if [ -e /etc/porteus-version ]; then
 			for a in ${LINKS[@]}; do
 				local shorty=${a##*/}
 				txz2xzm $STORAGE/$shorty
+				modcon=${shorty%.*}.xzm
+				[ "$ACTIVATEMOD" = "true" ] && activate $STORAGE/$modcon
 			done
 		fi
 				
@@ -336,6 +342,8 @@ if [ $installpackages ]; then
 		ROOT=$installpath upgradepkg --install-new $STORAGE/$b
 	done
 fi
+
+[ "$REMOVETXZ" = "true" ] && remove_packages
 
 if [ $GUI ]; then
 	if [ `awk '/^NOPROMPTS/ && /false/' $CONF` ]; then
@@ -525,5 +533,14 @@ for pkg in $1; do
     declare -i CSIZE=`tr -d [:alpha:] <<<$HSIZE`
     convert_size $CSIZE # Returns $OSIZE as MB or KB depending on value given in CSIZE
     DISP+=( "$pkg [$OSIZE]" )
+done
+}
+
+## Feed this function a set of full links to slackware packages
+## in an array called LINKS
+function remove_packages(){
+for a in ${LINKS[@]}; do
+	b=${a##*/}
+	rm $STORAGE/$b
 done
 }

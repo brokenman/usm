@@ -440,3 +440,161 @@ else # No updates available
 		[ $CLI ] && echo "$TXTUPDUSM3" || gtk_message1 "$TXTUPDUSM3"
 fi
 }; export -f update_usm
+
+function update_slackware(){
+local REPO=`sed '/#/d' $CONFDIR/mirrors-slackwarepatches.txt`
+local PATCHVER="_slack14.1"
+local PATCHDB="$DBDIR/slackwarepatches/PACKAGES.TXT"
+
+## Give warning
+echo
+pink "##### NOTICE ######"
+echo
+echo "`gettext "Updating the base system should be done while saving changes"`"
+echo "`gettext "otherwise problems may be encountered. You will finish with"`"
+echo "`gettext "both the old and the new package versions due to the modular"`"
+echo "`gettext "concept of Porteus and the aufs file system."`"
+echo
+
+read -p "`gettext " Press any key to continue."`" -n 1 -r -s && echo
+
+## Loop through the package list and match against patches
+echo && echo "Updates required:" && echo
+for a in /var/log/packages/*; do
+	LONGN=${a##*/}
+	PKGN=${a##*/}
+	WITHVER="${PKGN%-*-*}-"
+	WITHNOVER="${LONGN%-*-*-*}-"
+	SHORTN="${LONGN%-*-*}-"
+	## If local package exists in the patches db then do a version match
+	ISINPATCHES=`grep "E:  $WITHNOVER[0-9]" $PATCHDB | awk '{print$NF}'`
+	if [ "$ISINPATCHES" ]; then
+		## If it is the same version then ignore and continue
+		[ "$ISINPATCHES" = "${PKGN}.txz" ] && continue
+		HVER=`printf '%s\n' $ISINPATCHES ${PKGN}.txz | sort -V | tail -n1`
+		## If higher version is already local then ignore
+		[[ "$HVER" != "$ISINPATCHES" ]] && continue
+		echo "$PKGN --> $HVER"
+		## Add updates to array UPDREQ
+		UPDREQ+=( $PKGN )
+	fi
+done
+
+## Exit if no updates were found
+[ ${#UPDREQ[@]} -eq 0 ] && bold Nothing && cleanup
+
+## Get the links
+local REPO=`sed '/#/d' $CONFDIR/mirrors-slackwarepatches.txt`
+for a in `printf '%s\n' "${UPDREQ[@]}"`; do
+	SHORTN="${a%-*-*-*}-"
+	local PKGN=`grep "E:  $SHORTN[0-9]" $PATCHDB|awk '{print$NF}'`
+	local MID=`grep -A1 $SHORTN[0-9] $DBDIR/slackwarepatches/PACKAGES.TXT | tail -n1 | awk '{print$NF}' | sed  's ..  '`
+	local LINK=$REPO/slackware${SLACKSUFFIX}-$SLACKVER/$MID/$PKGN
+	LINKS+=( $LINK )
+done
+
+## Display menu to remove packages if required.
+if [ $CLI ]; then
+	## Since the argument being sent is an array we want to force the menu
+	## to be similar to if it came from updatedatabase
+	fromupdatesystem=0
+	echo
+	read -p "`gettext " Press [r] to remove packages, [q] to quit, or enter to continue."`" -n 1 -r -s && echo
+	[[ $REPLY =~ ^[Qq]$ ]] && cleanup
+	if [[ $REPLY =~ ^[Rr]$ ]]; then 
+		for a in ${LINKS[@]}; do shlink=${a##*/}; tLINKS+=( $shlink ); done
+		if [ ${#tLINKS[@]} -lt 10 ];then
+			menu_deselect "${tLINKS[@]}"
+			unset tLINKS
+				else
+			menu_deselect_plusten "${tLINKS[@]}"
+		fi
+	fi
+fi
+
+## Remove any deselected packages from the LINKS variable
+## If items were deselected there will be a FINALPKGS varilable
+if [ "$FINALPKGS" ]; then
+index=0
+for removeme in ${LINKS[@]}; do
+	b=${removeme##*/}
+	if [[ ! `grep -o $b <<<$FINALPKGS`  ]]; then
+		unset LINKS[$index]
+	fi
+	let index++
+done
+unset index
+fi
+
+## Get the package names from the links
+echo
+bold "`gettext " The following packages will be updated."`"
+echo
+printf '%s\n' ${LINKS[@]} | awk -F/ '{print$NF}'
+echo
+read -p "`gettext " Would you like to continue? [y/n]"`" -n 1 -r -s && echo
+[[ ! $REPLY =~ ^[Yy]$ ]] && cleanup
+echo
+
+## Download the packages
+for a in ${LINKS[@]}; do
+	b=${a##*/}
+	wget $a -P $STORAGE
+	[ ! is_porteus ] && upgradepkg $STORAGE/$b
+done
+
+## Exit now if on slackware
+echo
+if [ ! is_porteus ]; then
+	bold "`gettext "All upgrades have finished."`"
+	echo "`gettext " Packages are in $STORAGE"`"
+	cleanup
+fi
+
+## If user has set NOPROMPTS=true in config file then process
+if [ "$NOPROMPTS" = "true" ]; then
+	if [ "$MODULES" = "true" ]; then
+		for a in ${LINKS[@]}; do
+			b=${a##*/}
+			echo
+			echo "`gettext " Converting $b"`"
+			txz2xzm $STORAGE/$b
+			echo
+			upgradepkg $STORAGE/$b
+			[ "$REMOVETXZ" = "true" ] && rm $STORAGE/$b
+			PORTMOD=${b%.*}.xzm
+			activate $STORAGE/$PORTMOD
+		done
+	else
+		echo
+		echo "`gettext " Downloads have finished."`"
+		echo "`gettext " Slackware packages are in $STORAGE"`"
+		echo
+		cleanup
+	fi
+else
+	## User chose to have prompts so ask permission
+	echo
+	bold "`gettext "To remove these questions, set NOPROMPTS=true in $CONF"`"
+	echo
+	read -p "`gettext " Would you like to convert the packages to modules? [y/n]"`" -n 1 -r -s && echo
+	[[ $REPLY =~ ^[Yy]$ ]] && MODULES=true || MODULES=false
+	read -p "`gettext " Would you like to remove the slackware packages? [y/n]"`" -n 1 -r -s && echo
+	[[ $REPLY =~ ^[Yy]$ ]] && REMOVETXZ=true
+	if [ "$MODULES" = "true" ]; then
+		read -p "`gettext " Would you like to activate the modules after conversion? [y/n]"`" -n 1 -r -s && echo
+		[[ $REPLY =~ ^[Yy]$ ]] && REMOVETXZ=true
+	fi
+	for a in ${LINKS[@]}; do
+		b=${a##*/}
+		c=${b%.*}.xzm
+		pkgr=$STORAGE/$b
+		[ "$MODULES" = "true" ] && upgradepkg $STORAGE/$b && txz2xzm $pkgr && activate $STORAGE/$c
+		[ "$REMOVETXZ" = "true" ] && rm $pkgr
+	done
+fi
+echo
+bold "`gettext "All operations are complete."`"
+echo "`gettext " Any file downloaded is in $STORAGE"`"
+echo "`gettext " You will need to move them to your modules folder to persist."`"
+}; export -f update_slackware
