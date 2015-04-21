@@ -1,5 +1,7 @@
 Tue Apr 21 18:28:16 UTC 2015
 Added update slackware packages: usm -u system
+Added activate Porteus modules by default
+Added remove slackware packages to config file
 
 +-------------------------
 Sun Dec 14 18:56:32 UTC 2014
