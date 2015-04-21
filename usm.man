@@ -14,7 +14,7 @@ repositories including slackware, slacky, salix and alien.
 .SH OPTIONS
 .TP
 \fB-u\fP
-[sbo|alien|salix|ponce|slackware|slacky|all|usm] Update databases (or usm).
+[sbo|alien|salix|ponce|slackware|slacky|all|usm|system] Update databases/system (or usm).
 .TP
 \fB-k\fP
 [package-name] Keyword search
@@ -94,6 +94,8 @@ usm update slacky
 .P
 .SH USAGE EXAMPLES
 \fBusm -u usm\fP Will check for and install updates to USM itself.
+.br
+\fBusm -u system\fP Will check for updates to slackware packages (experimental on Porteus).
 .br
 \fBusm -d\fP with no argument means ALL installed packages will be processed for dependencies.
 .br
