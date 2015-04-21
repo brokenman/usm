@@ -90,10 +90,15 @@ done
 
 msg=" nothing"
 for i in ${!required[@]}; do 
-    #[[ "${choices[i]}" ]] && { FINALPKGS="${FINALPKGS} ${required[i]}"; msg=""; }
-    [[ "${choices[i]}" = "+" ]] && NEWFINAL+=( `echo $FINALPKGS|tr ' ' '\n'|grep ${required[i]}` )
+    if [ "$fromupdatesystem" ]; then
+		[[ "${choices[i]}" ]] && { NEWFINAL="${NEWFINAL} ${required[i]}"; msg=""; }
+	else
+		[[ "${choices[i]}" = "+" ]] && NEWFINAL+=( `echo $FINALPKGS|tr ' ' '\n'|grep ${required[i]}` )
+	fi
 done
-FINALPKGS=${NEWFINAL[@]} && unset NEWFINAL
+FINALPKGS=${NEWFINAL[@]}
+unset NEWFINAL
+
 echo
 }
 
