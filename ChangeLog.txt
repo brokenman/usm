@@ -1,6 +1,11 @@
+Tue Apr 21 18:28:16 UTC 2015
+Added update slackware packages: usm -u system
+
++-------------------------
 Sun Dec 14 18:56:32 UTC 2014
 Added python deps to bleachbit
 Added package version check for GUI
+Fixed merge modules bug
 
 +-------------------------
 Fri Nov 01 15:29:28 UTC 2014
