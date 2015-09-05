@@ -1,10 +1,10 @@
 ## Version control for USM
 
 # Actual USM application version
-USMVERSION=3.1.7
+USMVERSION=3.1.8
 
 # Release date of USM
-USMVER=140930
+USMVER=150903
 
 # Slackware database version by date
-DBVER=140929
+DBVER=150903
