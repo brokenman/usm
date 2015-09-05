@@ -83,7 +83,7 @@ MLOC=`grep -A8 "NAME: $1$" $SBOTXT|grep "LOCATION:"|awk '{print$NF}'|sed  's .. 
 TLOC=${MLOC%/*}
 local SRCLINK=$REPO_SBO/$SLACKVER/$TLOC/$1.tar.gz
 if [ "$ARCH" = "x86_64" ]; then
-    DLINK=`awk '/NAME: '$1'$/{c=7}c&&c--' $SBOTXT |awk -F: /DOWNLOAD_x86_64/'{print$NF}'`
+    DLINK=`awk '/NAME: '$1'$/{c=7}c&&c--' $SBOTXT |awk -F'64:' /DOWNLOAD_x86_64/'{print$NF}'`
     [ -z $DLINK ] && DLINK=`awk '/NAME: '$1'$/{c=7}c&&c--' $SBOTXT |awk /DOWNLOAD:/'{print$NF}'`
         else
     DLINK=`awk '/NAME: '$1'$/{c=7}c&&c--' $SBOTXT |awk /DOWNLOAD:/'{print$NF}'`
