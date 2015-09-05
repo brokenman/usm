@@ -9,7 +9,7 @@ echo
 echo "`gettext " Use example:"`" "$SCRIPT -u all" "`gettext "(to update all databases)"`"
 echo
 echo -e $txtbld "`gettext "Options \t\t\t Arguments"`" $rst
-echo -e "`gettext "  -u: Update databases. \t alien|ponce|salix|slackware|slacky|all"`"
+echo -e "`gettext "  -u: Update databases. \t alien|ponce|salix|slackware|slacky|slackonly|all"`"
 echo -e "`gettext "  -u usm: Update the usm package to latest version"`"
 echo -e "`gettext "  -s: Package search. \t\t <package>"`"
 echo -e "`gettext "  -s: Reverse library search. \t <library>"`"
