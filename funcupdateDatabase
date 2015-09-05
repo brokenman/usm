@@ -10,7 +10,7 @@ FROMUPDATEALL=0
 ## Only update if a manual update wasn't already done today
 NOWTIME=`date +%s`
 TLIMIT=`awk -F= '/SKIPDB/{print$NF}' $CONF`
-for a in alien salix slacky ponce slackware slackwarepatches sbo; do
+for a in alien salix slacky ponce slackware slackwarepatches slackonly sbo; do
 	if [ "$a" != "sbo" ]; then
 		THENTIME=`stat -c %X $DBDIR/$a/OPTIFEST 2>/dev/null`
 		if [ $(( NOWTIME - THENTIME )) -lt  $TLIMIT ]; then
@@ -217,6 +217,27 @@ slacky )
 		else
 			echo "$a" > $TMPDIR/.message
 			wget $WFLAGS -o $TMPDIR/.progress $UPDLINK/db/slacky/$ARCH/$a -P $SDIR
+			sleep 0.4
+		fi
+	done
+;;
+slackonly )
+	[  "$ARCH" = "x86_64" ] && local ARCHI=x86_64 || local ARCHI=x86
+	for a in $FILES; do
+		if [ $CLI ]; then
+			download $REPO_SLACKONLY/$SLACKVER-$ARCHI/$a $SDIR
+		else
+			echo "$a" > $TMPDIR/.message
+			wget $WFLAGS -o $TMPDIR/.progress $REPO_SLACKY/$SLACKVER-$ARCHI/$a -P $SDIR
+			sleep 0.4
+		fi
+	done
+	for a in $EXTRAS; do
+		if [ $CLI ]; then
+			download $UPDLINK/db/slackonly/$ARCH/$a $SDIR
+		else
+			echo "$a" > $TMPDIR/.message
+			wget $WFLAGS -o $TMPDIR/.progress $UPDLINK/db/slackonly/$ARCH/$a -P $SDIR
 			sleep 0.4
 		fi
 	done
