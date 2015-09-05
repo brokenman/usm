@@ -1,4 +1,8 @@
 +-------------------------
+Fri Aug 04 01:10:02 UTC 2015
+Add slackonly repository
+
++-------------------------
 Sat May 02 13:48:10 UTC 2015
 Fixed bug for keyword search (thanks Seva)
 
