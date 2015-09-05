@@ -17,6 +17,7 @@ CL=ChangeLog.txt
 [ "$1" = "slackware" ] && CHLINK="$REPO_SLACKWARE/slackware${SLACKSUFFIX}-$SLACKVER/$CL"
 [ "$1" = "slackwarepatches" ] && CHLINK="$REPO_SLACKWARE/slackware${SLACKSUFFIX}-$SLACKVER/patches/$CL"
 [ "$1" = "slacky" ] && CHLINK="$REPO_SLACKY/slackware${SLACKSUFFIX}-$SLACKVER/$CL"
+[ "$1" = "slackonly" ] && CHLINK="$REPO_SLACKONLY/$SLACKVER-$ARCH/$CL"
 [ "$1" = "salix" ] && CHLINK="$REPO_SALIX/$ARCH/$SLACKVER/ChangeLog.txt"
 [ "$1" = "ponce" ] && CHLINK="$REPO_PONCE/slackware${SLACKSUFFIX}-$SLACKVER/packages/$CL"
 
