@@ -178,7 +178,7 @@ case $1 in
 [ "$2" == "?" ] && help_give "`gettext "usm -u <distro>"`" "`gettext "For example: usm -u slackware"`"
 [ `grep -o noprompt <<<$@` ] && export NOPROMPTS=true
 shift
-[ ! `egrep -o "slackware|slackwarepatches|slacky|salix|alien|ponce|sbo|usm|system|all" <<<"$1"` ] && \
+[ ! `egrep -o "slackware|slackwarepatches|slacky|slackonly|salix|alien|ponce|sbo|usm|system|all" <<<"$1"` ] && \
 help_give "`gettext "usm -u <distro>"`" "`gettext "For example: usm -u slackware"`"
 ## Remove version check file if exists
 [ -e $TMPDIR/vercheck.txt ] && rm $TMPDIR/vercheck.txt
@@ -187,6 +187,7 @@ help_give "`gettext "usm -u <distro>"`" "`gettext "For example: usm -u slackware
 [ "$1" == "slackware" ] && { update_database slackware; cleanup; }
 [ "$1" == "slackwarepatches" ] && { update_database slackwarepatches; cleanup; }
 [ "$1" == "slacky" ] && { update_database slacky; cleanup; }
+[ "$1" == "slackonly" ] && { update_database slackonly; cleanup; }
 [ "$1" == "salix" ] && { update_database salix; cleanup; }
 [ "$1" == "alien" ] && { update_database alien; cleanup; }
 [ "$1" == "ponce" ] && { update_database ponce; cleanup; }
@@ -435,6 +436,9 @@ export USM_MAIN='
 	</menuitem>
 	<menuitem icon="gtk-edit"><label>'$(gettext "Edit slacky mirror")'</label>
 		<action>gtk_editFile '$CONFDIR/mirrors-slacky.txt' &</action>
+	</menuitem>
+	<menuitem icon="gtk-edit"><label>'$(gettext "Edit slackonly mirror")'</label>
+		<action>gtk_editFile '$CONFDIR/mirrors-slackonly.txt' &</action>
 	</menuitem>
 	<menuitem icon="gtk-edit"><label>'$(gettext "Edit ponce mirror")'</label>
 		<action>gtk_editFile '$CONFDIR/mirrors-ponce.txt' &</action>
