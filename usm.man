@@ -14,7 +14,7 @@ repositories including slackware, slacky, salix and alien.
 .SH OPTIONS
 .TP
 \fB-u\fP
-[sbo|alien|salix|ponce|slackware|slacky|all|usm|system] Update databases/system (or usm).
+[sbo|alien|salix|ponce|slackware|slacky|slackonly|all|usm|system] Update databases/system (or usm).
 .TP
 \fB-k\fP
 [package-name] Keyword search
