@@ -63,7 +63,7 @@ echo "The default is 3 hours"
 unset SKIPPED THENTIME NOWTIME TLIMIT PFILE
 
 ## Report close window
-[ $GUI ] && green "`gettext "You can now close this window"`"
+[ $GUI ] && green "`gettext "Please restart the application to refreshthe database."`"
 }; export -f update_all
 
 ## ======================================================================
