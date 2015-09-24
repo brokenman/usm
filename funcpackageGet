@@ -89,7 +89,7 @@ for pkg in ${PKGLIST[@]}; do
 	local DIST=`cut -d':' -f1 <<<$LONG|awk -F/ '{print $(NF-1)}'`
 	local PKGSHORT=${pkg%-*-*-*}
 	local LNKREPO=`grep -m1 -e "^\([a-z]\)" $CONFDIR/mirrors-$DIST.txt`
-	local MID=`grep -A1 "NAME:  $pkg" $DBDIR/$DIST/PACKAGES.TXT|tail -n1|awk '{print$NF}'|sed  's ..  '`
+	local MID=`grep -A3 "NAME:  $pkg" $DBDIR/$DIST/PACKAGES.TXT|awk '/LOCATION:/{print$NF}'|sed  's ..  '`
 
 	[ "$DIST" = "slackware" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
 	[ "$DIST" = "slackwarepatches" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
@@ -97,6 +97,7 @@ for pkg in ${PKGLIST[@]}; do
 	[ "$DIST" = "alien" ] && local EXTRA=$SLACKVER/$ARCHI
 	[ "$DIST" = "salix" ] && local EXTRA=$ARCH/$SLACKVER
 	[ "$DIST" = "ponce" ] && { unset EXTRA; local MID="slackware${SLACKSUFFIX}-$SLACKVER/packages"; }
+	[ "$DIST" = "slackonly" ] && local EXTRA=$SLACKVER-$ARCHI
 	local LINK=$LNKREPO/$EXTRA/$MID/$pkg
 	LINKS+=( $LINK )
 	local HSIZE=`grep -A3 "NAME:  $pkg" $DBDIR/$DIST/PACKAGES.TXT|grep -i "(compressed)"|awk -F: '{ gsub (" ", "", $0); print$NF}'`
@@ -532,7 +533,7 @@ for pkg in $1; do
     [ "$DIST" = "salix" ] && local EXTRA=$ARCH/$SLACKVER/salix
     [ "$DIST" = "ponce" ] && local EXTRA=slackware$SLACKSUFFIX-$SLACKVER
     [ "$DIST" = "slackonly" ] && local EXTRA=$SLACKVER-$ARCHI
-    local MID=`grep -A1 "NAME:  $pkg" $DBDIR/$DIST/PACKAGES.TXT|tail -n1|awk '{print$NF}'|sed  's ..  '`
+    local MID=`grep -A3 "NAME:  $pkg" $DBDIR/$DIST/PACKAGES.TXT|awk '/LOCATION:/{print$NF}'|sed  's ..  '`
     [ "$DIST" = "ponce" ] && local MID=packages
     local LINK=$LNKREPO/$EXTRA/$MID/$pkg
     LINKS+=( $LINK )
