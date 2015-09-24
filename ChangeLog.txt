@@ -1,4 +1,14 @@
 +-------------------------
+Thu Sept 24 22:22:21 UTC 2015
+Added message to close window after db update
+Fixed single packages not activating
+Fixed broken download link in slackonly
+
++-------------------------
+Sat Aug 05 19:21:16 UTC 2015
+Fixed sbo broken source link on 64bit when noarch package is chosen
+
++-------------------------
 Fri Aug 04 01:10:02 UTC 2015
 Add slackonly repository
 
