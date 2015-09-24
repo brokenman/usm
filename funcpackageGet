@@ -160,7 +160,7 @@ if [ $CLI ]; then
 	[ "$MERGE" == "false" ] && unset MERGE
 	if [ -z $MERGE ] && [ `awk '/^NOPROMPTS/ && /false/' $CONF` ]; then
 		read -p "`gettext " Would you like to install the package/s? (custom paths are supported) [y/n]"`" -n 1 -r -s && echo
-		[[ $REPLY =~ ^[Yy]$ ]] && { installpackages=true; ACTIVATEMOD=true; } || ACTIVATEMOD=false
+		[[ $REPLY =~ ^[Yy]$ ]] && { installpackages=true; ACTIVATEMOD=false; } || unset installpackages
 	fi
 fi
 unset REPLY
