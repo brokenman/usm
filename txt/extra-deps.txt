@@ -18,6 +18,9 @@ bluez-firmware
 #  catfish
 python,pygobject,pygtk,pycairo
 
+#  diffuse
+python,pycairo,pygobject,pygtk
+
 #  docutils
 python
 
@@ -56,6 +59,9 @@ lcms2
 
 #  k3b
 cdrdao
+
+#  medit
+python,pycairo,pygobject,pygtk
 
 #  kicad
 python
